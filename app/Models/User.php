@@ -2,7 +2,6 @@
 
 namespace App\Models;
 
-use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
@@ -41,4 +40,14 @@ class User extends Authenticatable
     protected $casts = [
         'email_verified_at' => 'datetime',
     ];
+
+    public function stocks()
+    {
+        return $this->belongsToMany(Stock::class, 'UserStockMaps', 'user_id', 'stock_id');
+    }
+
+    public function stock_positions()
+    {
+        return $this->hasMany(UserStockPosition::class, 'user_id', 'id');
+    }
 }
