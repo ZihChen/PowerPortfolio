@@ -16,6 +16,11 @@ class AuthController extends Controller
         $this->userService = $userService;
     }
 
+    public function loginPage()
+    {
+        return view('login_page');
+    }
+
     public function signUp(CreateUserValidator $request)
     {
         $form = $request->all();

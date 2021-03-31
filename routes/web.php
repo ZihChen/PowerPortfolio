@@ -18,9 +18,9 @@ Route::get('/', function () {
     return view('welcome');
 });
 
-Route::get('test', [\App\Http\Controllers\StockController::class, 'test']);
-
 Route::post('sign_up', [AuthController::class, 'signUp']);
+
+Route::get('login', [AuthController::class, 'loginPage']);
 
 Route::post('login', [AuthController::class, 'login']);
 
