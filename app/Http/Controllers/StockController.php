@@ -2,15 +2,20 @@
 
 namespace App\Http\Controllers;
 
-use App\Services\StockService;
+use App\Services\AlphaAdvantageService;
 use Illuminate\Http\Request;
 
 class StockController extends Controller
 {
-    protected $stockService;
+    protected $alphaAdvantageService;
 
-    public function __construct(StockService $stockService)
+    public function __construct(AlphaAdvantageService $alphaAdvantageService)
     {
-        $this->stockService = $stockService;
+        $this->alphaAdvantageService = $alphaAdvantageService;
+    }
+
+    public function test()
+    {
+        $this->alphaAdvantageService->getStockKDIndicatorRecords('msft');
     }
 }

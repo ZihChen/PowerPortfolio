@@ -10,12 +10,16 @@ namespace App\Services;
 
 
 use App\AlphaAdvantage\AlphaAdvantageAPI;
+use App\Traits\ErrorResponseCodeTrait;
+use App\Traits\ErrorResponseMsgTrait;
 use Carbon\Carbon;
 use Carbon\CarbonPeriod;
 use Illuminate\Http\Exceptions\HttpResponseException;
 
-class StockService
+class AlphaAdvantageService
 {
+    use ErrorResponseMsgTrait, ErrorResponseCodeTrait;
+
     protected $alphaAdvantage;
 
     public function __construct(AlphaAdvantageAPI $alphaAdvantage)
@@ -31,7 +35,9 @@ class StockService
     {
         $response = $this->alphaAdvantage->callAPIByFunction(AlphaAdvantageAPI::GLOBAL_QUOTE, $symbol);
 
-        if (empty($response)) throw new HttpResponseException(response('symbol not found', 400));
+        if (isset($response['Note'])) throw new HttpResponseException(response($this->highFrequencyRequestMsg, $this->accepted));
+
+        if (empty($response)) throw new HttpResponseException(response($this->symbolNotFoundMsg, $this->notFound));
 
         return [
             'symbol' => $response['Global Quote']['01. symbol'],
@@ -51,7 +57,9 @@ class StockService
     {
         $response = $this->alphaAdvantage->callAPIByFunction(AlphaAdvantageAPI::OVERVIEW, $symbol);
 
-        if (empty($response)) throw new HttpResponseException(response('symbol not found', 400));
+        if (isset($response['Note'])) throw new HttpResponseException(response($this->highFrequencyRequestMsg, $this->accepted));
+
+        if (empty($response)) throw new HttpResponseException(response($this->symbolNotFoundMsg, $this->notFound));
 
         return [
             'symbol' => $response['Symbol'],
@@ -73,7 +81,9 @@ class StockService
     {
         $response = $this->alphaAdvantage->callAPIByFunction(AlphaAdvantageAPI::TIME_SERIES_DAILY, $symbol);
 
-        if (isset($response['Error Message'])) throw new HttpResponseException(response('symbol not found', 400));
+        if (isset($response['Note'])) throw new HttpResponseException(response($this->highFrequencyRequestMsg, $this->accepted));
+
+        if (isset($response['Error Message'])) throw new HttpResponseException(response($this->symbolNotFoundMsg, $this->notFound));
 
         $response = $response['Time Series (Daily)'];
 
@@ -87,7 +97,7 @@ class StockService
 
         $flag = 0;
 
-        $filter_arr = [];
+        $filter_fields = [];
 
         foreach ($period as $date) {
 
@@ -97,7 +107,7 @@ class StockService
 
             if (empty($response[$date])) continue;
 
-            $filter_arr[$date] = [
+            $filter_fields[$date] = [
                 'open_price' => $response[$date]['1. open'],
                 'low_price' => $response[$date]['3. low'],
                 'high_price' => $response[$date]['2. high'],
@@ -105,6 +115,50 @@ class StockService
             ];
         }
 
-        return $filter_arr;
+        return $filter_fields;
+    }
+
+    public function getStockKDIndicatorRecords($symbol)
+    {
+        $response = $this->alphaAdvantage->callAPIByFunction(AlphaAdvantageAPI::STOCH, $symbol);
+
+        if (isset($response['Note'])) throw new HttpResponseException(response($this->highFrequencyRequestMsg, $this->accepted));
+
+        if (empty($response)) throw new HttpResponseException(response($this->symbolNotFoundMsg, $this->notFound));
+
+        $response = $response['Technical Analysis: STOCH'];
+
+        $now = Carbon::now();
+
+        $now_date = $now->toDateString();
+
+        $before_two_months = (clone ($now)->addMonth(-2))->toDateString();
+
+        $period = array_reverse(CarbonPeriod::create($before_two_months, $now_date)->toArray());
+
+        $filter_fields = [];
+
+        $flag = 0;
+
+        foreach ($period as $date) {
+
+            if ($flag == 15) break;
+
+            $date = $date->format('Y-m-d');
+
+            if (empty($response[$date])) continue;
+
+            if (in_array($date, array_keys($response))) {
+
+                $filter_fields[$date] = [
+                    'stochastic_k' => $response[$date]['SlowK'],
+                    'stochastic_d' => $response[$date]['SlowD'],
+                ];
+
+                $flag++;
+            }
+        }
+
+        return $filter_fields;
     }
 }
