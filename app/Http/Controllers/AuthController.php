@@ -18,7 +18,7 @@ class AuthController extends Controller
 
     public function registerPage()
     {
-        return view('register');
+        return view('register_page');
     }
 
     public function loginPage()
@@ -32,7 +32,7 @@ class AuthController extends Controller
 
         $this->userService->createUser($form);
 
-        return response('success', 200);
+        return redirect('login');
     }
 
     public function login(Request $request)

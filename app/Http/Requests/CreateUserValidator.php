@@ -24,7 +24,7 @@ class CreateUserValidator extends APIRequest
         return [
             'name' => 'required|string',
             'email' => 'required|string|email|unique:users',
-            'password' => 'required|string'
+            'password' => 'required|string|confirmed'
         ];
     }
 }
