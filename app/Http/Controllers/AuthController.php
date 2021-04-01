@@ -16,12 +16,17 @@ class AuthController extends Controller
         $this->userService = $userService;
     }
 
+    public function registerPage()
+    {
+        return view('register');
+    }
+
     public function loginPage()
     {
         return view('login_page');
     }
 
-    public function signUp(CreateUserValidator $request)
+    public function register(CreateUserValidator $request)
     {
         $form = $request->all();
 
@@ -38,7 +43,8 @@ class AuthController extends Controller
         ]);
 
         if (!Auth::attempt($validate_data)) {
-            return response(['msg' => 'Authorization failed'], 401);
+
+            return redirect()->back();
         }
 
         $user = $request->user();
@@ -47,14 +53,14 @@ class AuthController extends Controller
 
         $result->token->save();
 
-        return response(['access_token' => $result->accessToken], 200);
+        return redirect('dashboard');
     }
 
-    public function logout(Request $request)
+    public function logout()
     {
-        $request->user()->token()->revoke();
+        Auth::logout();
 
-        return response(['msg' => 'Logout success'], 200);
+        return redirect('login');
     }
 
     public function getUser(Request $request)
