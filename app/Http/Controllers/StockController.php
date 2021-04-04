@@ -16,6 +16,6 @@ class StockController extends Controller
 
     public function test()
     {
-        $this->alphaAdvantageService->getStockKDIndicatorRecords('msft');
+
     }
 }
