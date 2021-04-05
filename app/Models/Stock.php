@@ -11,7 +11,7 @@ class Stock extends Model
 
     protected $table = 'Stocks';
 
-    protected $fillable = ['symbol', 'name', 'type', 'sector', 'industry', 'quote_latest_refresh', 'overview_latest_refresh'];
+    protected $fillable = ['symbol', 'name', 'type', 'sector', 'industry', 'quote_latest_refresh', 'fiscal_latest_refresh'];
 
     public function daily_records()
     {

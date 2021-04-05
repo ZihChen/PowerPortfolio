@@ -33,7 +33,15 @@ class StockService
             'sector' => $data['sector'],
             'industry' => $data['industry'],
             'quote_latest_refresh' => isset($data['quote_latest_refresh']) ? $data['quote_latest_refresh'] : $now_date,
-            'overview_latest_refresh' => isset($data['overview_latest_refresh']) ? $data['overview_latest_refresh'] : $now_date,
+            'fiscal_latest_refresh' => isset($data['fiscal_latest_refresh']) ? $data['fiscal_latest_refresh'] : $now_date,
+        ]);
+    }
+
+    public function updateStockRefreshDate($stock, $quote_latest_refresh, $fiscal_latest_refresh)
+    {
+        return $stock->update([
+            'quote_latest_refresh' => $quote_latest_refresh,
+            'fiscal_latest_refresh' => $fiscal_latest_refresh,
         ]);
     }
 }

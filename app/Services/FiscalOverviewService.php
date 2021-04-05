@@ -17,13 +17,14 @@ class FiscalOverviewService
             'latest_refresh' => $data['latest_refresh']
         ], [
             'latest_refresh' => $data['latest_refresh'],
-            'eps' => is_integer($data['eps']) ? $data['eps'] : 0.0,
-            'pe_ratio' => is_integer($data['pe_ratio']) ? $data['pe_ratio'] : 0.0,
-            'roa_ttm' => $data['roa_ttm'],
-            'roe_ttm' => $data['roe_ttm'],
+            'eps' => round($data['eps'], 2),
+            'pe_ratio' => round($data['pe_ratio'], 2),
+            'roa_ttm' => round($data['roa_ttm'], 2),
+            'roe_ttm' => round($data['roe_ttm'], 2),
             'profit_margin' => $data['profit_margin'],
             'operating_margin' => $data['operating_margin'],
             'ev_to_revenue' => $data['ev_to_revenue'],
+            'content' => $data['content'],
         ]);
     }
 }

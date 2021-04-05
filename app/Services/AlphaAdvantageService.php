@@ -27,6 +27,27 @@ class AlphaAdvantageService
         $this->alphaAdvantage = $alphaAdvantage;
     }
 
+    public function searchStockInfo($symbol)
+    {
+        $response = $this->alphaAdvantage->callAPIByFunction(AlphaAdvantageAPI::SYMBOL_SEARCH, $symbol);
+
+        if (isset($response['Note'])) throw new HttpResponseException(response($this->highFrequencyRequestMsg, $this->accepted));
+
+        if (empty($response['bestMatches'])) throw new HttpResponseException(response($this->symbolNotFoundMsg, $this->notFound));
+
+        $response = $response['bestMatches'];
+
+        return array_map(function ($item) {
+
+            return [
+                'symbol' => $item['1. symbol'],
+                'name' => $item['2. name'],
+                'type' => $item['3. type'],
+            ];
+
+        }, $response);
+    }
+
     /**
      * @param $symbol
      * @return array
@@ -47,6 +68,25 @@ class AlphaAdvantageService
             'change_percent' => $response['Global Quote']['10. change percent'],
             'date' => $response['Global Quote']['07. latest trading day'],
         ];
+    }
+
+    public function getStockRsiIndicator($symbol)
+    {
+        $response = $this->alphaAdvantage->callAPIByFunction(AlphaAdvantageAPI::RSI, $symbol);
+
+        if (isset($response['Note'])) throw new HttpResponseException(response($this->highFrequencyRequestMsg, $this->accepted));
+
+        if (empty($response)) throw new HttpResponseException(response($this->symbolNotFoundMsg, $this->notFound));
+
+        $response = $response['Technical Analysis: RSI'];
+
+        return array_map(function ($record) {
+
+            return [
+                'rsi' => $record['RSI']
+            ];
+
+        }, array_slice($response, 0, 15));
     }
 
     /**
@@ -74,6 +114,7 @@ class AlphaAdvantageService
             'profit_margin' => $response['ProfitMargin'],
             'operating_margin' => $response['OperatingMarginTTM'],
             'ev_to_revenue' => $response['EVToRevenue'],
+            'content' => json_encode($response),
         ];
     }
 

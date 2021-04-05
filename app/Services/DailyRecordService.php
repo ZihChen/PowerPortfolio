@@ -39,7 +39,7 @@ class DailyRecordService
         ]);
     }
 
-    public function insertDailyRecordsByStock($stock, $daily_records, $kd_records)
+    public function insertDailyRecordsByStock($stock, $daily_records, $kd_records, $rsi_records)
     {
         $now = Carbon::now();
 
@@ -67,13 +67,14 @@ class DailyRecordService
 
                 $insert_fields[] = [
                     'date' => $date,
-                    'close_price' => $daily_records[$date]['4. close'],
-                    'low_price' => $daily_records[$date]['3. low'],
-                    'high_price' => $daily_records[$date]['2. high'],
-                    'change_percent' => round((($daily_records_value[$flag]['4. close'] - $daily_records_value[$flag + 1]['4. close']) / $daily_records_value[$flag + 1]['4. close']) * 100, 2),    //公式:當日收盤 - 昨日收盤 / 昨日收盤
+                    'close_price' => $daily_records[$date]['close_price'],
+                    'low_price' => $daily_records[$date]['low_price'],
+                    'high_price' => $daily_records[$date]['high_price'],
+                    'change_percent' => round((($daily_records_value[$flag]['close_price'] - $daily_records_value[$flag + 1]['close_price']) / $daily_records_value[$flag + 1]['close_price']) * 100, 2),    //公式:當日收盤 - 昨日收盤 / 昨日收盤
                     'rsv' => 0.0,
                     'stochastic_k' => $kd_records[$date]['stochastic_k'],
                     'stochastic_d' => $kd_records[$date]['stochastic_d'],
+                    'rsi' => $rsi_records[$date]['rsi'],
                     'stock_id' => $stock->id,
                     'created_at' => $now_carbon,
                     'updated_at' => $now_carbon,
