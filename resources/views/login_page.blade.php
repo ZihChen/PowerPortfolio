@@ -13,31 +13,26 @@
         <div class="col-auto">
             <button type="submit" class="btn btn-primary mb-3">登入帳號</button>
         </div>
+        <div class="link">
+            <a href="register" class="btn btn-link">註冊帳號</a>
+        </div>
     </form>
 </div>
-<div class="link">
-    <a href="register" class="btn btn-link">註冊帳號</a>
-</div>
+
 
 <a></a>
 
 <style>
     .row-form {
-        text-align: center;
-        margin-top: 100px;
-        margin-left: 20px;
+        position:fixed;
     }
     .col-auto {
-        margin-top: 10px;
-        margin-left: 500px;
-        margin-right: 500px;
-    }
-    .btn-primary {
-        margin-left: -295px;
+        margin-top: 20px;
+        margin-left: 20px;
+        width: 100%;
     }
     .link {
-        text-align: center;
-        margin-left: 340px;
-        margin-top: -70px;
+        text-align: right;
+        margin-top: -55px;
     }
 </style>

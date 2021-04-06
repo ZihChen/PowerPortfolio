@@ -20,6 +20,6 @@ class DashboardController
 
     public function getDashboard(Request $request)
     {
-
+        return view('dashboard');
     }
 }

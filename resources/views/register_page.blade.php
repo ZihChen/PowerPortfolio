@@ -29,20 +29,15 @@
 
 <style>
     .row-form {
-        text-align: center;
-        margin-top: 100px;
-        margin-left: 20px;
+        position:fixed;
     }
     .col-auto {
-        margin-top: 10px;
-        margin-left: 500px;
-        margin-right: 500px;
-    }
-    .btn-primary {
-        margin-left: -325px;
+        margin-top: 20px;
+        margin-left: 20px;
     }
     .cancel {
-        margin-top: -54px;
-        margin-left: -170px;
+        text-align: center;
+        margin-top: -55px;
+        margin-left: 30px;
     }
 </style>
