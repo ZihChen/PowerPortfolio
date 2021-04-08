@@ -70,7 +70,8 @@ class DailyRecordService
                     'close_price' => $daily_records[$date]['close_price'],
                     'low_price' => $daily_records[$date]['low_price'],
                     'high_price' => $daily_records[$date]['high_price'],
-                    'change_percent' => round((($daily_records_value[$flag]['close_price'] - $daily_records_value[$flag + 1]['close_price']) / $daily_records_value[$flag + 1]['close_price']) * 100, 2),    //公式:當日收盤 - 昨日收盤 / 昨日收盤
+                    'change_percent' => round((($daily_records_value[$flag]['close_price'] - $daily_records_value[$flag + 1]['close_price'])
+                            / $daily_records_value[$flag + 1]['close_price']) * 100, 2),    //公式:當日收盤 - 昨日收盤 / 昨日收盤
                     'rsv' => 0.0,
                     'stochastic_k' => $kd_records[$date]['stochastic_k'],
                     'stochastic_d' => $kd_records[$date]['stochastic_d'],
@@ -88,7 +89,7 @@ class DailyRecordService
     }
 
     /**
-     * 更新最後三筆DailyRecords的RSV
+     * 更新最後三筆DailyRecords的RSV，用於計算KD
      * @param $stock
      */
     public function calculateRsvAndUpdateLatestThreeRecords($stock)
@@ -116,22 +117,22 @@ class DailyRecordService
     /**
      * 計算當日的KD值
      * @param $stock
-     * @param $res
+     * @param $latest_quote
      * @return array
      */
-    public function calculateStochasticOscillatorAndUpdate($stock, $res)
+    public function calculateStochasticOscillator($stock, $latest_quote)
     {
         $daily_records = $stock->daily_records()->take(8)->get();
 
         $highest_price = $daily_records->max('high_price');
 
-        if ($res['high_price'] > $highest_price) $highest_price = $res['high_price'];
+        if ($latest_quote['high_price'] > $highest_price) $highest_price = $latest_quote['high_price'];
 
         $lowest_price = $daily_records->min('low_price');
 
-        if ($res['low_price'] < $lowest_price) $lowest_price = $res['low_price'];
+        if ($latest_quote['low_price'] < $lowest_price) $lowest_price = $latest_quote['low_price'];
 
-        $rsv = ($res['close_price'] - $lowest_price) / ($highest_price - $lowest_price);
+        $rsv = ($latest_quote['close_price'] - $lowest_price) / ($highest_price - $lowest_price);
 
         $latest_two_records = $daily_records->take(2);
 
@@ -143,6 +144,58 @@ class DailyRecordService
             'rsv' => $rsv,
             'stochastic_k' => $stochastic_k,
             'stochastic_d' => $stochastic_d,
+        ];
+    }
+
+    /**
+     * 計算RSI指標
+     *
+     * RSI = 100 - ( 100 / (1 + RS) )
+     * RS = avg_gain(N days) / avg_loss(N days)
+     *
+     * @param $stock
+     * @param $latest_quote
+     * @return array
+     */
+    public function calculateRSI($stock, $latest_quote)
+    {
+        $daily_records = $stock->daily_records()->take(14)->get();
+
+        $close_price_collect = ($daily_records->pluck('close_price')->reverse()->push($latest_quote['close_price']))->values();
+
+        $close_price_arr = $close_price_collect->toArray();
+
+        $avg_gain = [];
+
+        $avg_loss = [];
+
+        for ($count = 0; $count < 15; $count++) {
+
+            if ($count == 0) continue;
+
+            $diff_value = $close_price_arr[$count] - $close_price_arr[$count - 1];
+
+            if ($diff_value > 0) {
+
+                $avg_gain[] = $diff_value;
+
+            } elseif ($diff_value == 0) {
+
+                continue;
+
+            } else {
+
+                $avg_loss[] = $diff_value;
+
+            }
+        }
+
+        $rs = abs(array_sum($avg_gain) / array_sum($avg_loss));
+
+        $rsi = 100 - (100 / (1 + $rs));
+
+        return [
+            'rsi' => $rsi,
         ];
     }
 }
