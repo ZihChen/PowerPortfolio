@@ -116,6 +116,12 @@ class DailyRecordService
 
     /**
      * 計算當日的KD值
+     * ex. fast-k:9,slow-k:3,slow-d:3
+     * 公式:
+     * K = ((當日RSV + 前2日RSV) / 3) * 100
+     * D = (當日K + 前2日K) / 3
+     * RSV = (當日收盤價 - 9日內最低價) / (9日內最高價 - 9日內最低價)
+     *
      * @param $stock
      * @param $latest_quote
      * @return array
@@ -149,7 +155,7 @@ class DailyRecordService
 
     /**
      * 計算RSI指標
-     *
+     * 公式:
      * RSI = 100 - ( 100 / (1 + RS) )
      * RS = avg_gain(N days) / avg_loss(N days)
      *
