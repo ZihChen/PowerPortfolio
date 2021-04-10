@@ -2,12 +2,15 @@
 
 namespace App\Console\Commands;
 
+use App\Imports\ExcelToCollectionField;
+use App\Models\Stock;
 use App\Services\AlphaAdvantageService;
 use App\Services\DailyRecordService;
 use App\Services\FiscalOverviewService;
 use App\Services\StockService;
 use Carbon\Carbon;
 use Illuminate\Console\Command;
+use Maatwebsite\Excel\Facades\Excel;
 
 class InitialStocksDataCommand extends Command
 {
@@ -16,14 +19,14 @@ class InitialStocksDataCommand extends Command
      *
      * @var string
      */
-    protected $signature = 'init:data';
+    protected $signature = 'init:data {--file_path= : csv or excel file}';
 
     /**
      * The console command description.
      *
      * @var string
      */
-    protected $description = 'Command description';
+    protected $description = 'Command line:php artisan init:data --file_path=app/Form/stock_symbols_01.xlsx';
 
     /**
      * Create a new command instance.
@@ -54,95 +57,76 @@ class InitialStocksDataCommand extends Command
         /** @var DailyRecordService $dailyRecordService */
         $dailyRecordService = app(DailyRecordService::class);
 
-        foreach ($this->symbols() as $symbol) {
+        $file_path = $this->option('file_path');
 
-            $search_result = $alphaAdvantageService->searchStockInfo($symbol);
+        $excel = Excel::toCollection(new ExcelToCollectionField(), $file_path);
 
-            $best_match = $search_result[0];
+        $symbols = $excel->first()->collapse();
 
-            $insert_data = [
-                'symbol' => $best_match['symbol'],
-                'name' => $best_match['name'],
-                'type' => $best_match['type'],
-                'sector' => 'N/A',
-                'industry' => 'N/A',
-            ];
+        foreach ($symbols as $symbol) {
 
-            if ($best_match['type'] == 'Equity') {
+            $stock = Stock::where('symbol', $symbol)->first();
 
-                $fiscal_overview = $alphaAdvantageService->getStockOverview($symbol);
+            if (!empty($stock)) continue;
 
-                $insert_data['sector'] = $fiscal_overview['sector'];
-                $insert_data['industry'] = $fiscal_overview['industry'];
+            try {
+
+                $search_result = $alphaAdvantageService->searchStockInfo($symbol);
+
+                $best_match = $search_result[0];
+
+                $insert_data = [
+                    'symbol' => $best_match['symbol'],
+                    'name' => $best_match['name'],
+                    'type' => $best_match['type'],
+                    'sector' => 'N/A',
+                    'industry' => 'N/A',
+                ];
+
+                if ($best_match['type'] == 'Equity') {
+
+                    $fiscal_overview = $alphaAdvantageService->getStockOverview($symbol);
+
+                    $insert_data['sector'] = $fiscal_overview['sector'];
+                    $insert_data['industry'] = $fiscal_overview['industry'];
+                }
+
+                $stock = $stockService->firstOrCreateStock($insert_data);
+
+                if ($best_match['type'] == 'Equity') {
+
+                    $fiscalOverviewService->firstOrCreateFiscalOverview($stock, $fiscal_overview);
+                }
+
+                $daily_records = $alphaAdvantageService->getDailyStockRecords($symbol);
+
+                $kd_records = $alphaAdvantageService->getStockKDIndicatorRecords($symbol);
+
+                $rsi_records = $alphaAdvantageService->getStockRsiIndicator($symbol);
+
+                $dailyRecordService->insertDailyRecordsByStock($stock, $daily_records, $kd_records, $rsi_records);
+
+                $dailyRecordService->calculateRsvAndUpdateLatestThreeRecords($stock);
+
+                $stockService->updateStockRefreshDate($stock, $stock->latest_daily_record->date, empty($fiscal_overview['latest_refresh']) ? Carbon::now()->toDateString() : $fiscal_overview['latest_refresh']);
+
+                $this->info("\n" . $stock->symbol . ' ' . 'create completed.');
+
+                sleep(60);
+
+            } catch (\Throwable $e) {
+
+                $this->warn('Error Message:' . $e->getMessage());
+
+                if ($e->getCode() == 202) {
+
+                    $this->warn($symbol . ' is not completed');
+
+                    sleep(60);
+                }
             }
 
-            $stock = $stockService->firstOrCreateStock($insert_data);
-
-            if ($best_match['type'] == 'Equity') {
-
-                $fiscalOverviewService->firstOrCreateFiscalOverview($stock, $fiscal_overview);
-            }
-
-            $daily_records = $alphaAdvantageService->getDailyStockRecords($symbol);
-
-            $kd_records = $alphaAdvantageService->getStockKDIndicatorRecords($symbol);
-
-            $rsi_records = $alphaAdvantageService->getStockRsiIndicator($symbol);
-
-            $dailyRecordService->insertDailyRecordsByStock($stock, $daily_records, $kd_records, $rsi_records);
-
-            $dailyRecordService->calculateRsvAndUpdateLatestThreeRecords($stock);
-
-            $stockService->updateStockRefreshDate($stock, $stock->latest_daily_record->date, empty($fiscal_overview['latest_refresh']) ? Carbon::now()->toDateString() : $fiscal_overview['latest_refresh']);
-
-            $this->info("\n" . $stock->symbol . ' ' . 'create completed.');
-
-            sleep(60);
         }
 
     }
-
-    private function symbols()
-    {
-        return [
-//            'VTI',
-//            'QQQ',
-//            'CQQQ',
-//            'SOXX',
-//            'ARKK',
-//            'XBI',
-//            'SKYY',
-//            'VXX',
-            'MSFT',
-            'AAPL',
-            'MA',
-            'V',
-            'TSLA',
-            'AMZN',
-            'GOOG',
-            'FB',
-            'ADBE',
-            'CRM',
-            'TSM',
-            'NVDA',
-            'AMD',
-            'SQ',
-            'PYPL',
-            'BABA',
-            'JNJ',
-            'DIS',
-            'JPM',
-            'KO',
-            'MCD',
-            'UNH',
-            'SNOW',
-            'PLTR',
-            'NET',
-            'FSLY',
-            'ABNB',
-            'UBER',
-        ];
-
-    }
-
 }

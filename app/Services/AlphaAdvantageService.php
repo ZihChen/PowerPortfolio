@@ -14,7 +14,7 @@ use App\Traits\ErrorResponseCodeTrait;
 use App\Traits\ErrorResponseMsgTrait;
 use Carbon\Carbon;
 use Carbon\CarbonPeriod;
-use Illuminate\Http\Exceptions\HttpResponseException;
+use Exception;
 
 class AlphaAdvantageService
 {
@@ -27,13 +27,18 @@ class AlphaAdvantageService
         $this->alphaAdvantage = $alphaAdvantage;
     }
 
+    /**
+     * @param $symbol
+     * @return array
+     * @throws Exception
+     */
     public function searchStockInfo($symbol)
     {
         $response = $this->alphaAdvantage->callAPIByFunction(AlphaAdvantageAPI::SYMBOL_SEARCH, $symbol);
 
-        if (isset($response['Note'])) throw new HttpResponseException(response($this->highFrequencyRequestMsg, $this->accepted));
+        if (isset($response['Note'])) throw new Exception($this->highFrequencyRequestMsg, $this->accepted);
 
-        if (empty($response['bestMatches'])) throw new HttpResponseException(response($this->symbolNotFoundMsg, $this->notFound));
+        if (empty($response['bestMatches'])) throw new Exception($this->symbolNotFoundMsg, $this->notFound);
 
         $response = $response['bestMatches'];
 
@@ -51,14 +56,15 @@ class AlphaAdvantageService
     /**
      * @param $symbol
      * @return array
+     * @throws Exception
      */
     public function getStockLatestQuote($symbol)
     {
         $response = $this->alphaAdvantage->callAPIByFunction(AlphaAdvantageAPI::GLOBAL_QUOTE, $symbol);
 
-        if (isset($response['Note'])) throw new HttpResponseException(response($this->highFrequencyRequestMsg, $this->accepted));
+        if (isset($response['Note'])) throw new Exception($this->highFrequencyRequestMsg, $this->accepted);
 
-        if (empty($response)) throw new HttpResponseException(response($this->symbolNotFoundMsg, $this->notFound));
+        if (empty($response)) throw new Exception($this->symbolNotFoundMsg, $this->notFound);
 
         $response = $response['Global Quote'];
 
@@ -72,13 +78,18 @@ class AlphaAdvantageService
         ];
     }
 
+    /**
+     * @param $symbol
+     * @return array
+     * @throws Exception
+     */
     public function getStockRsiIndicator($symbol)
     {
         $response = $this->alphaAdvantage->callAPIByFunction(AlphaAdvantageAPI::RSI, $symbol);
 
-        if (isset($response['Note'])) throw new HttpResponseException(response($this->highFrequencyRequestMsg, $this->accepted));
+        if (isset($response['Note'])) throw new Exception($this->highFrequencyRequestMsg, $this->accepted);
 
-        if (empty($response)) throw new HttpResponseException(response($this->symbolNotFoundMsg, $this->notFound));
+        if (empty($response)) throw new Exception($this->symbolNotFoundMsg, $this->notFound);
 
         $response = $response['Technical Analysis: RSI'];
 
@@ -94,14 +105,15 @@ class AlphaAdvantageService
     /**
      * @param $symbol
      * @return array
+     * @throws Exception
      */
     public function getStockOverview($symbol)
     {
         $response = $this->alphaAdvantage->callAPIByFunction(AlphaAdvantageAPI::OVERVIEW, $symbol);
 
-        if (isset($response['Note'])) throw new HttpResponseException(response($this->highFrequencyRequestMsg, $this->accepted));
+        if (isset($response['Note'])) throw new Exception($this->highFrequencyRequestMsg, $this->accepted);
 
-        if (empty($response)) throw new HttpResponseException(response($this->symbolNotFoundMsg, $this->notFound));
+        if (empty($response)) throw new Exception($this->symbolNotFoundMsg, $this->notFound);
 
         return [
             'symbol' => $response['Symbol'],
@@ -120,13 +132,18 @@ class AlphaAdvantageService
         ];
     }
 
+    /**
+     * @param $symbol
+     * @return array
+     * @throws Exception
+     */
     public function getDailyStockRecords($symbol)
     {
         $response = $this->alphaAdvantage->callAPIByFunction(AlphaAdvantageAPI::TIME_SERIES_DAILY, $symbol);
 
-        if (isset($response['Note'])) throw new HttpResponseException(response($this->highFrequencyRequestMsg, $this->accepted));
+        if (isset($response['Note'])) throw new Exception($this->highFrequencyRequestMsg, $this->accepted);
 
-        if (isset($response['Error Message'])) throw new HttpResponseException(response($this->symbolNotFoundMsg, $this->notFound));
+        if (isset($response['Error Message'])) throw new Exception($this->symbolNotFoundMsg, $this->notFound);
 
         $response = $response['Time Series (Daily)'];
 
@@ -161,13 +178,18 @@ class AlphaAdvantageService
         return $filter_fields;
     }
 
+    /**
+     * @param $symbol
+     * @return array
+     * @throws Exception
+     */
     public function getStockKDIndicatorRecords($symbol)
     {
         $response = $this->alphaAdvantage->callAPIByFunction(AlphaAdvantageAPI::STOCH, $symbol);
 
-        if (isset($response['Note'])) throw new HttpResponseException(response($this->highFrequencyRequestMsg, $this->accepted));
+        if (isset($response['Note'])) throw new Exception($this->highFrequencyRequestMsg, $this->accepted);
 
-        if (empty($response)) throw new HttpResponseException(response($this->symbolNotFoundMsg, $this->notFound));
+        if (empty($response)) throw new Exception($this->symbolNotFoundMsg, $this->notFound);
 
         $response = $response['Technical Analysis: STOCH'];
 
