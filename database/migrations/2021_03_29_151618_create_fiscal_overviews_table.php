@@ -19,13 +19,13 @@ class CreateFiscalOverviewsTable extends Migration
             Schema::create('FiscalOverview', function (Blueprint $table) {
                 $table->id();
                 $table->integer('stock_id');
-                $table->float('eps');
-                $table->float('pe_ratio');
-                $table->float('roa_ttm');
-                $table->float('roe_ttm');
-                $table->float('profit_margin');
-                $table->float('operating_margin');
-                $table->float('ev_to_revenue');
+                $table->float('eps', 12, 6);
+                $table->float('pe_ratio', 12, 6);
+                $table->float('roa_ttm', 12, 6);
+                $table->float('roe_ttm', 12, 6);
+                $table->float('profit_margin', 12, 6);
+                $table->float('operating_margin', 12, 6);
+                $table->float('ev_to_revenue', 12, 6);
                 $table->text('content', 65535)->default('');
                 $table->date('latest_refresh');
                 $table->timestamps();

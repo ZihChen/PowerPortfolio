@@ -20,14 +20,14 @@ class CreateDailyStockRecordsTable extends Migration
                 $table->id();
                 $table->integer('stock_id');
                 $table->date('date');
-                $table->float('close_price');
-                $table->float('high_price');
-                $table->float('low_price');
-                $table->float('change_percent');
-                $table->float('rsv');
-                $table->float('stochastic_k');
-                $table->float('stochastic_d');
-                $table->float('rsi');
+                $table->float('close_price', 12, 6);
+                $table->float('high_price', 12, 6);
+                $table->float('low_price', 12, 6);
+                $table->float('change_percent', 12, 6);
+                $table->float('rsv', 12, 6);
+                $table->float('stochastic_k', 12, 6);
+                $table->float('stochastic_d', 12, 6);
+                $table->float('rsi', 12, 6);
                 $table->timestamps();
             });
         }

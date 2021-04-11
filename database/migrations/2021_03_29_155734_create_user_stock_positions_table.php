@@ -19,9 +19,9 @@ class CreateUserStockPositionsTable extends Migration
                 $table->id();
                 $table->integer('user_id');
                 $table->integer('stock_id');
-                $table->float('invested');
-                $table->float('target_position');
-                $table->float('avg_open');
+                $table->float('invested', 12, 6);
+                $table->float('target_position', 12, 6);
+                $table->float('avg_open', 12, 6);
                 $table->timestamps();
             });
         }
