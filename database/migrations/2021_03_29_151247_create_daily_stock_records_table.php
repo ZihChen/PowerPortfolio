@@ -24,10 +24,6 @@ class CreateDailyStockRecordsTable extends Migration
                 $table->float('high_price', 12, 6);
                 $table->float('low_price', 12, 6);
                 $table->float('change_percent', 12, 6);
-                $table->float('rsv', 12, 6);
-                $table->float('stochastic_k', 12, 6);
-                $table->float('stochastic_d', 12, 6);
-                $table->float('rsi', 12, 6);
                 $table->timestamps();
             });
         }
