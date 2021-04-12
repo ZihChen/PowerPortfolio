@@ -44,4 +44,9 @@ class StockService
             'fiscal_latest_refresh' => $fiscal_latest_refresh,
         ]);
     }
+
+    public function getStocksByUser($user, $relation_fields = [])
+    {
+        return $user->stocks()->with($relation_fields)->get();
+    }
 }

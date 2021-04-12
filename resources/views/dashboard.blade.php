@@ -20,27 +20,36 @@
                 <th scope="col">#</th>
                 <th scope="col">代號</th>
                 <th scope="col">名稱</th>
-                <th scope="col">當日收盤價</th>
+                <th scope="col">股票類型</th>
+                <th scope="col">收盤價</th>
+                <th scope="col">股價漲跌幅</th>
+                <th scope="col">K值</th>
+                <th scope="col">D值</th>
+                <th scope="col">RSI</th>
+                <th scope="col">更新日期</th>
+                <th scope="col">投資總額</th>
+                <th scope="col">目標倉位</th>
+                <th scope="col">平均開倉價</th>
             </tr>
             </thead>
             <tbody>
-            <tr>
-                <th scope="row">1</th>
-                <td>Mark</td>
-                <td>Otto</td>
-                <td>@mdo</td>
-            </tr>
-            <tr>
-                <th scope="row">2</th>
-                <td>Jacob</td>
-                <td>Thornton</td>
-                <td>@fat</td>
-            </tr>
-            <tr>
-                <th scope="row">3</th>
-                <td colspan="2">Larry the Bird</td>
-                <td>@twitter</td>
-            </tr>
+            @foreach($stocks as $key => $stock)
+                <tr>
+                    <th scope="row">{{$key + 1}}</th>
+                    <td>{{$stock['symbol']}}</td>
+                    <td>{{$stock['name']}}</td>
+                    <td>{{$stock['type']}}</td>
+                    <td>{{$stock['close_price']}}</td>
+                    <td>{{$stock['change_percent']}}%</td>
+                    <td>{{$stock['stochastic_k']}}</td>
+                    <td>{{$stock['stochastic_d']}}</td>
+                    <td>{{$stock['rsi']}}</td>
+                    <td>{{$stock['date']}}</td>
+                    <td>${{$stock['invested']}}</td>
+                    <td>{{$stock['target_position']}}%</td>
+                    <td>${{$stock['avg_open']}}</td>
+                </tr>
+            @endforeach
             </tbody>
         </table>
     </div>
