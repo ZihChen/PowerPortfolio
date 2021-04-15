@@ -80,12 +80,15 @@ class AlphaAdvantageService
 
     /**
      * @param $symbol
+     * @param string $interval
+     * @param string $series_type
+     * @param int $period
      * @return array
      * @throws Exception
      */
-    public function getStockRsiIndicator($symbol)
+    public function getStockRsiIndicatorRecords($symbol, $interval = 'daily', $series_type = 'close',$period = 14)
     {
-        $response = $this->alphaAdvantage->callAPIByFunction(AlphaAdvantageAPI::RSI, $symbol);
+        $response = $this->alphaAdvantage->callAPIByFunction(AlphaAdvantageAPI::RSI, $symbol, $interval, $period, $series_type);
 
         if (isset($response['Note'])) throw new Exception($this->highFrequencyRequestMsg, $this->accepted);
 
@@ -99,9 +102,8 @@ class AlphaAdvantageService
                 'rsi' => round($record['RSI'], 4)
             ];
 
-        }, array_slice($response, 0, 15));
+        }, array_slice($response, 0, 100));
     }
-
     /**
      * @param $symbol
      * @return array
@@ -133,6 +135,8 @@ class AlphaAdvantageService
     }
 
     /**
+     * 取得過去100日的價格
+     *
      * @param $symbol
      * @return array
      * @throws Exception
@@ -145,33 +149,18 @@ class AlphaAdvantageService
 
         if (isset($response['Error Message'])) throw new Exception($this->symbolNotFoundMsg, $this->notFound);
 
-        $response = $response['Time Series (Daily)'];
-
-        $now = Carbon::now();
-
-        $now_date = $now->toDateString();
-
-        $before_one_months = ($now->addMonth(-1))->toDateString();
-
-        $period = array_reverse(CarbonPeriod::create($before_one_months, $now_date)->toArray());
-
-        $flag = 0;
+        $results = $response['Time Series (Daily)'];
 
         $filter_fields = [];
 
-        foreach ($period as $date) {
+        foreach ($results as $date => $item) {
 
-            if ($flag == 15) break;
-
-            $date = $date->format('Y-m-d');
-
-            if (empty($response[$date])) continue;
-
-            $filter_fields[$date] = [
-                'open_price' => round($response[$date]['1. open'], 4),
-                'low_price' => round($response[$date]['3. low'], 4),
-                'high_price' => round($response[$date]['2. high'], 4),
-                'close_price' => round($response[$date]['4. close'], 4),
+            $filter_fields[] = [
+                'date' => $date,
+                'open_price' => round($item['1. open'], 4),
+                'low_price' => round($item['3. low'], 4),
+                'high_price' => round($item['2. high'], 4),
+                'close_price' => round($item['4. close'], 4),
             ];
         }
 
@@ -180,12 +169,14 @@ class AlphaAdvantageService
 
     /**
      * @param $symbol
+     * @param string $interval
+     * @param int $period
      * @return array
      * @throws Exception
      */
-    public function getStockKDIndicatorRecords($symbol)
+    public function getStockKDIndicatorRecords($symbol, $interval = 'daily', $period = 9)
     {
-        $response = $this->alphaAdvantage->callAPIByFunction(AlphaAdvantageAPI::STOCH, $symbol);
+        $response = $this->alphaAdvantage->callAPIByFunction(AlphaAdvantageAPI::STOCH, $symbol, $interval, $period);
 
         if (isset($response['Note'])) throw new Exception($this->highFrequencyRequestMsg, $this->accepted);
 
@@ -197,7 +188,7 @@ class AlphaAdvantageService
 
         $now_date = $now->toDateString();
 
-        $before_two_months = (clone ($now)->addMonth(-2))->toDateString();
+        $before_two_months = (clone ($now)->addMonth(-6))->toDateString();
 
         $period = array_reverse(CarbonPeriod::create($before_two_months, $now_date)->toArray());
 
@@ -207,7 +198,7 @@ class AlphaAdvantageService
 
         foreach ($period as $date) {
 
-            if ($flag == 15) break;
+            if (count($filter_fields) == 100) break;
 
             $date = $date->format('Y-m-d');
 
@@ -215,7 +206,8 @@ class AlphaAdvantageService
 
             if (in_array($date, array_keys($response))) {
 
-                $filter_fields[$date] = [
+                $filter_fields[] = [
+                    'date' => $date,
                     'stochastic_k' => round($response[$date]['SlowK'], 4),
                     'stochastic_d' => round($response[$date]['SlowD'], 4),
                 ];

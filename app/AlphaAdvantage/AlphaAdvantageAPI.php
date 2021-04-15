@@ -29,7 +29,7 @@ class AlphaAdvantageAPI
         $this->client = new Client();
     }
 
-    public function callAPIByFunction($method, $symbol, $interval = null, $period = null)
+    public function callAPIByFunction($method, $symbol, $interval = null, $period = null, $series_type = null)
     {
 
         switch ($method) {
@@ -80,7 +80,9 @@ class AlphaAdvantageAPI
 
                 $period = empty($period) ? '14' : $period;
 
-                $url = $this->url . "function=" . self::RSI . "&interval=$interval" . "&time_period=$period" . "&series_type=close" . "&symbol=" . $symbol;
+                $series_type = empty($series_type) ? 'close' : $series_type;
+
+                $url = $this->url . "function=" . self::RSI . "&interval=$interval" . "&time_period=$period" . "&series_type=close" . "&symbol=" . $symbol. "&series_type=" . $series_type;
 
                 break;
         }

@@ -15,7 +15,7 @@ class Stock extends Model
 
     public function daily_records()
     {
-        return $this->hasMany(DailyStockRecord::class, 'stock_id');
+        return $this->hasMany(DailyStockRecord::class, 'stock_id', 'id');
     }
 
     public function latest_daily_record()

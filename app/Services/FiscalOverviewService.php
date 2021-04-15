@@ -17,10 +17,10 @@ class FiscalOverviewService
             'latest_refresh' => $data['latest_refresh']
         ], [
             'latest_refresh' => $data['latest_refresh'],
-            'eps' => round($data['eps'], 2),
-            'pe_ratio' => round($data['pe_ratio'], 2),
-            'roa_ttm' => round($data['roa_ttm'], 2),
-            'roe_ttm' => round($data['roe_ttm'], 2),
+            'eps' => $data['eps'],
+            'pe_ratio' => $data['pe_ratio'],
+            'roa_ttm' => $data['roa_ttm'],
+            'roe_ttm' => $data['roe_ttm'],
             'profit_margin' => $data['profit_margin'],
             'operating_margin' => $data['operating_margin'],
             'ev_to_revenue' => $data['ev_to_revenue'],

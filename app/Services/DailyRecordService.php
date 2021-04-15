@@ -11,7 +11,6 @@ namespace App\Services;
 
 use App\Models\DailyStockRecord;
 use Carbon\Carbon;
-use Carbon\CarbonPeriod;
 
 class DailyRecordService
 {
@@ -39,50 +38,32 @@ class DailyRecordService
         ]);
     }
 
-    public function insertDailyRecordsByStock($stock, $daily_records, $kd_records, $rsi_records)
+    public function insertDailyRecordsByStock($stock, $daily_records)
     {
         $now = Carbon::now();
 
-        $now_date = $now->toDateString();
+        $records_total = count($daily_records);
 
-        $now_carbon = clone ($now);
-
-        $before_one_months = ($now->addMonth(-1))->toDateString();
-
-        $period = array_reverse(CarbonPeriod::create($before_one_months, $now_date)->toArray());
-
-        $daily_records_value = array_values($daily_records);
+        $is_write_change_percent = true;
 
         $insert_fields = [];
 
-        $flag = 0;
+        foreach ($daily_records as $key => $daily_record) {
 
-        foreach ($period as $date) {
+            if ($key == $records_total - 1) $is_write_change_percent = false;   //最後一筆因為沒有前一筆資料，所以change_percent不做更新
 
-            if ($flag == 15) break;
+            $insert_fields[] = [
+                'stock_id' => $stock->id,
+                'date' => $daily_record['date'],
+                'close_price' => $daily_record['close_price'],
+                'low_price' => $daily_record['low_price'],
+                'high_price' => $daily_record['high_price'],
+                'change_percent' => $is_write_change_percent ? round((($daily_records[$key]['close_price'] - $daily_records[$key + 1]['close_price'])
+                        / $daily_records[$key + 1]['close_price']) * 100, 4) : 0.0,    //公式:當日收盤 - 昨日收盤 / 昨日收盤
+                'created_at' => $now,
+                'updated_at' => $now,
+            ];
 
-            $date = $date->format('Y-m-d');
-
-            if (in_array($date, array_keys($daily_records))) {
-
-                $insert_fields[] = [
-                    'date' => $date,
-                    'close_price' => $daily_records[$date]['close_price'],
-                    'low_price' => $daily_records[$date]['low_price'],
-                    'high_price' => $daily_records[$date]['high_price'],
-                    'change_percent' => round((($daily_records_value[$flag]['close_price'] - $daily_records_value[$flag + 1]['close_price'])
-                            / $daily_records_value[$flag + 1]['close_price']) * 100, 2),    //公式:當日收盤 - 昨日收盤 / 昨日收盤
-                    'rsv' => 0.0,
-                    'stochastic_k' => $kd_records[$date]['stochastic_k'],
-                    'stochastic_d' => $kd_records[$date]['stochastic_d'],
-                    'rsi' => $rsi_records[$date]['rsi'],
-                    'stock_id' => $stock->id,
-                    'created_at' => $now_carbon,
-                    'updated_at' => $now_carbon,
-                ];
-
-                $flag++;
-            }
         }
 
         $this->dailyRecordModel->insert($insert_fields);
