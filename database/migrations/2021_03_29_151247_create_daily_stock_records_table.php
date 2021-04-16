@@ -19,7 +19,7 @@ class CreateDailyStockRecordsTable extends Migration
             Schema::create('DailyStockRecords', function (Blueprint $table) {
                 $table->id();
                 $table->integer('stock_id');
-                $table->date('date');
+                $table->date('date')->index('daily_record_date');
                 $table->float('close_price', 12, 6);
                 $table->float('high_price', 12, 6);
                 $table->float('low_price', 12, 6);

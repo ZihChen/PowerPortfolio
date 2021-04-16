@@ -19,6 +19,7 @@ class RelativeStrengthIndex extends Model
      * @var array
      */
     protected $fillable = [
+        'stock_id',
         'record_id',
         'date',
         'series_type',
@@ -32,5 +33,10 @@ class RelativeStrengthIndex extends Model
     public function daily_record()
     {
         return $this->belongsTo(DailyStockRecord::class, 'record_id', 'id');
+    }
+
+    public function stock()
+    {
+        return $this->belongsTo(Stock::class, 'stock_id', 'id');
     }
 }

@@ -32,4 +32,14 @@ class Stock extends Model
     {
         return $this->hasOne(FiscalOverview::class, 'stock_id', 'id')->orderBy('latest_refresh', 'desc')->latest();
     }
+
+    public function kd_records()
+    {
+        return $this->hasMany(StochasticOscillator::class, 'stock_id', 'id');
+    }
+
+    public function rsi_records()
+    {
+        return $this->hasMany(RelativeStrengthIndex::class, 'stock_id', 'id');
+    }
 }

@@ -18,7 +18,8 @@ class CreateRelativeStrengthIndicesTable extends Migration
 
             Schema::create('RelativeStrengthIndex', function (Blueprint $table) {
                 $table->id();
-                $table->integer('record_id');
+                $table->integer('record_id')->index('rsi_record_id');
+                $table->integer('stock_id')->index('rsi_stock_id');
                 $table->date('date');
                 $table->string('series_type');
                 $table->string('interval');
@@ -27,6 +28,9 @@ class CreateRelativeStrengthIndicesTable extends Migration
                 $table->float('avg_loss', 12, 6);
                 $table->float('rsi', 12, 6);
                 $table->timestamps();
+
+                $table->index(['record_id', 'date'], 'rsi_record_id_date_index');
+                $table->index(['stock_id', 'date'], 'rsi_stock_id_date_index');
             });
         }
     }
