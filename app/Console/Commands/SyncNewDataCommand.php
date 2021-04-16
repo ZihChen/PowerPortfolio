@@ -6,10 +6,28 @@ use App\Models\Stock;
 use App\Services\AlphaAdvantageService;
 use App\Services\DailyRecordService;
 use App\Services\FiscalOverviewService;
+use App\Services\RelativeStrengthIndexService;
+use App\Services\StochasticOscillatorService;
+use App\Services\StockService;
 use Illuminate\Console\Command;
 
 class SyncNewDataCommand extends Command
 {
+    const STANDARD_SYMBOL = 'QQQ';
+
+    /** @var StockService $stockService */
+    private $stockService;
+    /** @var AlphaAdvantageService $alphaAdvantageService */
+    private $alphaAdvantageService;
+    /** @var FiscalOverviewService $fiscalOverviewService */
+    private $fiscalOverviewService;
+    /** @var DailyRecordService $dailyRecordService */
+    private $dailyRecordService;
+    /** @var StochasticOscillatorService $stochasticOscillatorService */
+    private $stochasticOscillatorService;
+    /** @var RelativeStrengthIndexService $relativeStrengthIndexService */
+    private $relativeStrengthIndexService;
+
     /**
      * The name and signature of the console command.
      *
@@ -22,7 +40,7 @@ class SyncNewDataCommand extends Command
      *
      * @var string
      */
-    protected $description = 'Command description';
+    protected $description = '[更新每日股價資訊]:php artisan sync:new_data';
 
     /**
      * Create a new command instance.
@@ -32,26 +50,25 @@ class SyncNewDataCommand extends Command
     public function __construct()
     {
         parent::__construct();
+
+        $this->stockService = app(StockService::class);
+        $this->alphaAdvantageService = app(AlphaAdvantageService::class);
+        $this->fiscalOverviewService = app(FiscalOverviewService::class);
+        $this->dailyRecordService = app(DailyRecordService::class);
+        $this->stochasticOscillatorService = app(StochasticOscillatorService::class);
+        $this->relativeStrengthIndexService = app(RelativeStrengthIndexService::class);
     }
 
     /**
      * Execute the console command.
      *
-     * @return int
+     * @return void
+     * @throws \Exception
      */
     public function handle()
     {
-        /** @var AlphaAdvantageService $alphaAdvantageService */
-        $alphaAdvantageService = app(AlphaAdvantageService::class);
-
-        /** @var DailyRecordService $dailyRecordService */
-        $dailyRecordService = app(DailyRecordService::class);
-
-        /** @var FiscalOverviewService $fiscalOverviewService */
-        $fiscalOverviewService = app(FiscalOverviewService::class);
-
-        //最後一次收盤的日期
-        $res = $alphaAdvantageService->getStockLatestQuote('MSFT');
+        //取得最後一次收盤的日期
+        $res = $this->alphaAdvantageService->getStockLatestQuote(self::STANDARD_SYMBOL);
 
         $latest_trading_day = $res['date'];
 
@@ -59,7 +76,7 @@ class SyncNewDataCommand extends Command
 
             $query->where('date', $latest_trading_day);
         }])
-            ->each(function ($stock) use ($alphaAdvantageService, $dailyRecordService, $fiscalOverviewService) {
+            ->each(function ($stock) {
 
                 if (!empty($stock->latest_daily_record)) {
 
@@ -70,29 +87,33 @@ class SyncNewDataCommand extends Command
 
                 $stock_symbol = $stock->symbol;
 
-                $stock_quote = $alphaAdvantageService->getStockLatestQuote($stock_symbol);
+                $this->info("\n" . 'Start to acquire latest quote:' . $stock->symbol);
+                $stock_quote = $this->alphaAdvantageService->getStockLatestQuote($stock_symbol);
+                sleep(10);
 
                 //更新股價、指標
                 if ($stock->quote_latest_refresh != $stock_quote['date']) {
 
-                    $kd_indicator = $dailyRecordService->calculateStochasticOscillator($stock, $stock_quote);
+                    $kd_indicator = $this->dailyRecordService->calculateStochasticOscillator($stock, $stock_quote);
 
-                    $rsi_indicator = $dailyRecordService->calculateRSI($stock, $stock_quote);
+                    $rsi_indicator = $this->dailyRecordService->calculateRSI($stock, $stock_quote);
 
                     $new_daily_record = array_merge($stock_quote, $kd_indicator, $rsi_indicator);
 
-                    $dailyRecordService->firstOrCreateDailyRecordByStock($stock, $new_daily_record);
+                    $this->dailyRecordService->firstOrCreateDailyRecordByStock($stock, $new_daily_record);
 
                     $stock->quote_latest_refresh = $stock_quote['date'];
                 }
 
                 if ($stock->type == 'Equity') {
 
-                    $fiscal_info = $alphaAdvantageService->getStockOverview($stock_symbol);
+                    $this->info("\n" . 'Start to acquire latest fiscal overview...');
+                    $fiscal_info = $this->alphaAdvantageService->getStockOverview($stock_symbol);
+                    sleep(10);
 
                     if ($stock->fiscal_latest_refresh != $fiscal_info['latest_refresh']) {
 
-                        $fiscalOverviewService->firstOrCreateFiscalOverview($stock, $fiscal_info);
+                        $this->fiscalOverviewService->firstOrCreateFiscalOverview($stock, $fiscal_info);
 
                         $stock->fiscal_latest_refresh = $fiscal_info['latest_refresh'];
                     }
@@ -102,8 +123,9 @@ class SyncNewDataCommand extends Command
                 $stock->save();
 
                 $this->info("\n" . $stock->symbol . ' ' . 'update completed.');
+                sleep(15);
             });
 
-        $this->info("\n" . 'All data sync completed!');
+        $this->info("\n" . 'All sync completed!');
     }
 }

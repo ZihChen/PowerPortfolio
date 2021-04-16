@@ -47,7 +47,7 @@ class InitialStocksDataCommand extends Command
      *
      * @var string
      */
-    protected $description = 'Command line:php artisan init:data --file_path=app/Form/stock_symbols_01.xlsx';
+    protected $description = '[初始化股票標的]:php artisan init:data --file_path=app/Form/stock_symbols_01.xlsx';
 
     /**
      * Create a new command instance.
