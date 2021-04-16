@@ -61,6 +61,6 @@ class StochasticOscillatorService
             ];
         }
 
-        $this->kdModel->insert($insert_fields);
+        $this->kdModel->insert(array_reverse($insert_fields));
     }
 }

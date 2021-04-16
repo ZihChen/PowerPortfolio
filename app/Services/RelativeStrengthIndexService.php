@@ -50,8 +50,6 @@ class RelativeStrengthIndexService
 
         $insert_fields = [];
 
-        $daily_records = $daily_records->reverse()->values();
-
         $init_avg_gain = 0;
         $init_avg_loss = 0;
 

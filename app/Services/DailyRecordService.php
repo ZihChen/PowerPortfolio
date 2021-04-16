@@ -66,7 +66,7 @@ class DailyRecordService
 
         }
 
-        $this->dailyRecordModel->insert($insert_fields);
+        $this->dailyRecordModel->insert(array_reverse($insert_fields));
     }
 
     /**

@@ -13,6 +13,7 @@ use App\Services\StockService;
 use Carbon\Carbon;
 use Illuminate\Console\Command;
 use Maatwebsite\Excel\Facades\Excel;
+use Illuminate\Support\Facades\DB;
 
 class InitialStocksDataCommand extends Command
 {
@@ -106,6 +107,8 @@ class InitialStocksDataCommand extends Command
                     $insert_data['industry'] = $fiscal_overview['industry'];
                 }
 
+                DB::beginTransaction();
+
                 $stock = $this->stockService->firstOrCreateStock($insert_data);
 
                 if ($best_match['type'] == 'Equity') {
@@ -129,11 +132,15 @@ class InitialStocksDataCommand extends Command
 
                 $this->stockService->updateStockRefreshDate($stock, $stock->latest_daily_record->date, empty($fiscal_overview['latest_refresh']) ? Carbon::now()->toDateString() : $fiscal_overview['latest_refresh']);
 
+                DB::commit();
+
                 $this->info("\n" . $stock->symbol . ' ' . 'create completed.');
 
                 sleep(60);
 
             } catch (\Throwable $e) {
+
+                DB::rollBack();
 
                 $this->warn('Error Message:' . $e->getMessage());
 
