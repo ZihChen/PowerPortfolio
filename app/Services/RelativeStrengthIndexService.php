@@ -39,14 +39,17 @@ class RelativeStrengthIndexService
      * RS = AvgGain(N) / AvgLoss(N)
      * RSI = 100 - ( 100 / (1 + RS))
      *
-     * @param $daily_records
+     * @param $stock
      * @param $rsi_records
      * @param $interval
+     * @param $series_type
      * @param $rsi_period
      */
-    public function insertRsiIndicatorByDailyRecords($daily_records, $rsi_records, $interval, $series_type, $rsi_period)
+    public function insertRsiIndicatorByDailyRecords($stock, $rsi_records, $interval, $series_type, $rsi_period)
     {
         $now = Carbon::now();
+
+        $daily_records = $stock->daily_records;
 
         $insert_fields = [];
 
@@ -95,6 +98,7 @@ class RelativeStrengthIndexService
 
                 $insert_fields[] = [
                     'date' => $daily_records[$i]['date'],
+                    'stock_id' => $stock->id,
                     'record_id' => optional($daily_records[$i])->id,
                     'rsi' => $rsi_records[$daily_records[$i]['date']]['rsi'],
                     'avg_gain' => $init_avg_gain,
@@ -117,6 +121,7 @@ class RelativeStrengthIndexService
 
                 $insert_fields[] = [
                     'date' => $daily_records[$i]['date'],
+                    'stock_id' => $stock->id,
                     'record_id' => optional($daily_records[$i])->id,
                     'rsi' => $rsi_records[$daily_records[$i]['date']]['rsi'],
                     'avg_gain' => ($init_avg_gain * (1 - (1 / $rsi_period)) + ($price_up * (1 / $rsi_period))),
@@ -137,6 +142,7 @@ class RelativeStrengthIndexService
 
             $insert_fields[] = [
                 'date' => $daily_records[$i]['date'],
+                'stock_id' => $stock->id,
                 'record_id' => optional($daily_records[$i])->id,
                 'rsi' => $rsi_records[$daily_records[$i]['date']]['rsi'],
                 'avg_gain' => (last($insert_fields)['avg_gain'] * (1 - (1 / $rsi_period)) + ($price_up * (1 / $rsi_period))),

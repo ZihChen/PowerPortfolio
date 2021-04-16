@@ -21,9 +21,11 @@ class StochasticOscillatorService
         $this->kdModel = $kdModel;
     }
 
-    public function insertKdIndicatorByDailyRecords($daily_records, $kd_records, $interval, $kd_period)
+    public function insertKdIndicatorByDailyRecords($stock, $kd_records, $interval, $kd_period)
     {
         $now = Carbon::now();
+
+        $daily_records = $stock->daily_records;
 
         $rsv_arr = [];
 
@@ -47,6 +49,7 @@ class StochasticOscillatorService
         foreach ($kd_records as $kd_record) {
 
             $insert_fields[] = [
+                'stock_id' => $stock->id,
                 'record_id' => optional($daily_records->where('date', $kd_record['date'])->first())->id,
                 'date' => $kd_record['date'],
                 'interval' => $interval,

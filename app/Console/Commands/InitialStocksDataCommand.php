@@ -87,7 +87,9 @@ class InitialStocksDataCommand extends Command
 
             try {
 
+                $this->info("\n" . 'Start searching symbol:' . $symbol);
                 $search_result = $this->alphaAdvantageService->searchStockInfo($symbol);
+                sleep(10);
 
                 $best_match = $search_result[0];
 
@@ -101,7 +103,9 @@ class InitialStocksDataCommand extends Command
 
                 if ($best_match['type'] == 'Equity') {
 
+                    $this->info("\n" . 'Start to migrate fiscal overview...');
                     $fiscal_overview = $this->alphaAdvantageService->getStockOverview($symbol);
+                    sleep(10);
 
                     $insert_data['sector'] = $fiscal_overview['sector'];
                     $insert_data['industry'] = $fiscal_overview['industry'];
@@ -116,27 +120,30 @@ class InitialStocksDataCommand extends Command
                     $this->fiscalOverviewService->firstOrCreateFiscalOverview($stock, $fiscal_overview);
                 }
 
+                $this->info("\n" . 'Start to migrate quote daily records...');
                 $daily_records = $this->alphaAdvantageService->getDailyStockRecords($symbol);
+                sleep(10);
 
+                $this->info("\n" . 'Start to migrate KD daily records...');
                 $kd_records = $this->alphaAdvantageService->getStockKDIndicatorRecords($symbol, self::INTERVAL, self::KD_PERIOD);
+                sleep(10);
 
+                $this->info("\n" . 'Start to migrate RSI daily records...');
                 $rsi_records = $this->alphaAdvantageService->getStockRsiIndicatorRecords($symbol, self::INTERVAL, self::SERIAL_TYPE, self::RSI_PERIOD);
+                sleep(10);
 
                 $this->dailyRecordService->insertDailyRecordsByStock($stock, $daily_records);
 
-                $daily_records = $stock->daily_records;
+                $this->stochasticOscillatorService->insertKdIndicatorByDailyRecords($stock, $kd_records, self::INTERVAL, self::KD_PERIOD);
 
-                $this->stochasticOscillatorService->insertKdIndicatorByDailyRecords($daily_records, $kd_records, self::INTERVAL, self::KD_PERIOD);
-
-                $this->relativeStrengthIndexService->insertRsiIndicatorByDailyRecords($daily_records, $rsi_records, self::INTERVAL, self::SERIAL_TYPE, self::RSI_PERIOD);
+                $this->relativeStrengthIndexService->insertRsiIndicatorByDailyRecords($stock, $rsi_records, self::INTERVAL, self::SERIAL_TYPE, self::RSI_PERIOD);
 
                 $this->stockService->updateStockRefreshDate($stock, $stock->latest_daily_record->date, empty($fiscal_overview['latest_refresh']) ? Carbon::now()->toDateString() : $fiscal_overview['latest_refresh']);
 
                 DB::commit();
 
-                $this->info("\n" . $stock->symbol . ' ' . 'create completed.');
-
-                sleep(60);
+                $this->info("\n" . $stock->symbol . ' ' . 'migrate completed.');
+                sleep(15);
 
             } catch (\Throwable $e) {
 
@@ -144,7 +151,7 @@ class InitialStocksDataCommand extends Command
 
                 $this->warn('Error Message:' . $e->getMessage());
 
-                $this->warn('line:' . $e->getTraceAsString());
+                $this->warn('trace:' . $e->getTraceAsString());
 
                 $this->warn('line:' . $e->getLine());
 
@@ -152,11 +159,9 @@ class InitialStocksDataCommand extends Command
 
                     $this->warn($symbol . ' is not completed');
 
-                    sleep(60);
+                    sleep(30);
                 }
             }
-
         }
-
     }
 }
