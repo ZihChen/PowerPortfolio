@@ -17,12 +17,6 @@ class DailyStockRecord extends Model
         'high_price',
         'low_price',
         'change_percent',
-        'rsv',
-        'stochastic_k',
-        'stochastic_d',
-        'avg_gain',
-        'avg_loss',
-        'rsi',
     ];
 
     public function stock()

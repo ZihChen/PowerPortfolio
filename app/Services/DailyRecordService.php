@@ -31,10 +31,6 @@ class DailyRecordService
             'low_price' => $data['low_price'],
             'high_price' => $data['high_price'],
             'change_percent' => (float)$data['change_percent'],
-            'rsv' => $data['rsv'],
-            'stochastic_k' => $data['stochastic_k'],
-            'stochastic_d' => $data['stochastic_d'],
-            'rsi' => $data['rsi'],
         ]);
     }
 
