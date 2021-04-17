@@ -158,6 +158,58 @@ class RelativeStrengthIndexService
         $this->rsiModel->insert($insert_fields);
     }
 
+    /**
+     * 計算RSI指標
+     * 公式:
+     * RSI = 100 - ( 100 / (1 + RS) )
+     * RS = avg_gain(N days) / avg_loss(N days)
+     *
+     * @param $stock
+     * @param $latest_quote
+     * @return array
+     */
+    public function calculateRSI($stock, $latest_quote)
+    {
+        $daily_records = $stock->daily_records()->take(14)->get();
+
+        $close_price_collect = ($daily_records->pluck('close_price')->reverse()->push($latest_quote['close_price']))->values();
+
+        $close_price_arr = $close_price_collect->toArray();
+
+        $avg_gain = [];
+
+        $avg_loss = [];
+
+        for ($count = 0; $count < 15; $count++) {
+
+            if ($count == 0) continue;
+
+            $diff_value = $close_price_arr[$count] - $close_price_arr[$count - 1];
+
+            if ($diff_value > 0) {
+
+                $avg_gain[] = $diff_value;
+
+            } elseif ($diff_value == 0) {
+
+                continue;
+
+            } else {
+
+                $avg_loss[] = $diff_value;
+
+            }
+        }
+
+        $rs = abs(array_sum($avg_gain) / array_sum($avg_loss));
+
+        $rsi = 100 - (100 / (1 + $rs));
+
+        return [
+            'rsi' => $rsi,
+        ];
+    }
+
     private function getClosePriceChange($change)
     {
         if ($change > 0) {

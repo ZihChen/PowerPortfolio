@@ -94,9 +94,9 @@ class SyncNewDataCommand extends Command
                 //更新股價、指標
                 if ($stock->quote_latest_refresh != $stock_quote['date']) {
 
-                    $kd_indicator = $this->dailyRecordService->calculateStochasticOscillator($stock, $stock_quote);
+                    $kd_indicator = $this->stochasticOscillatorService->calculateStochasticOscillator($stock, $stock_quote);
 
-                    $rsi_indicator = $this->dailyRecordService->calculateRSI($stock, $stock_quote);
+                    $rsi_indicator = $this->relativeStrengthIndexService->calculateRSI($stock, $stock_quote);
 
                     $new_daily_record = array_merge($stock_quote, $kd_indicator, $rsi_indicator);
 

@@ -72,4 +72,43 @@ class StochasticOscillatorService
 
         $this->kdModel->insert(array_reverse($insert_fields));
     }
+
+    /**
+     * 計算當日的KD值
+     * ex. fast-k:9,slow-k:3,slow-d:3
+     * 公式:
+     * K = ((當日RSV + 前2日RSV) / 3) * 100
+     * D = (當日K + 前2日K) / 3
+     * RSV = (當日收盤價 - 9日內最低價) / (9日內最高價 - 9日內最低價)
+     *
+     * @param $stock
+     * @param $latest_quote
+     * @return array
+     */
+    public function calculateStochasticOscillator($stock, $latest_quote)
+    {
+        $daily_records = $stock->daily_records()->take(8)->get();
+
+        $highest_price = $daily_records->max('high_price');
+
+        if ($latest_quote['high_price'] > $highest_price) $highest_price = $latest_quote['high_price'];
+
+        $lowest_price = $daily_records->min('low_price');
+
+        if ($latest_quote['low_price'] < $lowest_price) $lowest_price = $latest_quote['low_price'];
+
+        $rsv = ($latest_quote['close_price'] - $lowest_price) / ($highest_price - $lowest_price);
+
+        $latest_two_records = $daily_records->take(2);
+
+        $stochastic_k = ($latest_two_records->pluck('rsv')->push($rsv)->avg() * 100);
+
+        $stochastic_d = $latest_two_records->pluck('stochastic_k')->push($stochastic_k)->avg();
+
+        return [
+            'rsv' => $rsv,
+            'stochastic_k' => $stochastic_k,
+            'stochastic_d' => $stochastic_d,
+        ];
+    }
 }
