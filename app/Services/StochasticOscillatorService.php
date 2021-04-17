@@ -29,17 +29,23 @@ class StochasticOscillatorService
 
         $rsv_arr = [];
 
-        for ($i = 0; $i < ($daily_records->count() - $kd_period); $i++) {
+        for ($i = 0; $i < ($daily_records->count() - ($kd_period - 1)); $i++) {
+
+            $target_daily_record = $daily_records[$i + ($kd_period - 1)];
 
             $period_records = $daily_records->slice($i, $kd_period);
 
             $highest_price = $period_records->max('high_price');
 
+            if ($target_daily_record['high_price'] > $highest_price) $highest_price = $target_daily_record['high_price'];
+
             $lowest_price = $period_records->min('low_price');
 
-            $rsv = ($daily_records[$i]->close_price - $lowest_price) / ($highest_price - $lowest_price);
+            if ($target_daily_record['low_price'] < $lowest_price) $lowest_price = $target_daily_record['low_price'];
 
-            $rsv_arr[$daily_records[$i]->date] = [
+            $rsv = ($target_daily_record->close_price - $lowest_price) / ($highest_price - $lowest_price);
+
+            $rsv_arr[$target_daily_record->date] = [
                 'rsv' => $rsv,
             ];
         }
