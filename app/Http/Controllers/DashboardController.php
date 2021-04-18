@@ -29,13 +29,33 @@ class DashboardController
     {
         $user = $request->user();
 
-        $stocks = $this->stockService->getStocksByUser($user, ['latest_daily_record']);
+        $interval = $request->get('interval', 'daily');
+
+        $kd_period = $request->get('kd_period', 9);
+
+        $rsi_period = $request->get('rsi_period', 14);
+
+        $stocks = $this->stockService->getStocksByUser($user, [
+            'latest_daily_record'
+        ]);
 
         $stock_positions = $this->userStockPositionService->getStockPositionsByUser($user);
 
-        $stocks = $stocks->map(function ($stock) use ($stock_positions) {
+        $stocks = $stocks->map(function ($stock) use ($stock_positions, $interval, $kd_period, $rsi_period) {
 
             $latest_daily_record = optional($stock->latest_daily_record);
+
+            $kd_record = $stock->kd_records()->orderBy('date', 'desc')
+                ->where('interval', $interval)
+                ->where('fastk_period', $kd_period)
+                ->take(1)
+                ->first();
+
+            $rsi_record = $stock->rsi_records()->orderBy('date', 'desc')
+                ->where('interval', $interval)
+                ->where('time_period', $rsi_period)
+                ->take(1)
+                ->first();
 
             $stock_position = $stock_positions->where('stock_id', $stock->id)->first();
 
@@ -46,9 +66,9 @@ class DashboardController
                 'type' => $stock->type,
                 'close_price' => $latest_daily_record->close_price,
                 'change_percent' => $latest_daily_record->change_percent,
-                'stochastic_k' => $latest_daily_record->stochastic_k,
-                'stochastic_d' => $latest_daily_record->stochastic_d,
-                'rsi' => $latest_daily_record->rsi,
+                'stochastic_k' => optional($kd_record)->stochastic_k,
+                'stochastic_d' => optional($kd_record)->stochastic_d,
+                'rsi' => optional($rsi_record)->rsi,
                 'date' => $latest_daily_record->date,
                 'invested' => empty($stock_position) ? 0.0 : $stock_position->invested,
                 'target_position' => empty($stock_position) ? 0.0 : $stock_position->target_position,
