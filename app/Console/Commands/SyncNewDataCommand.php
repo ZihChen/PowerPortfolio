@@ -14,6 +14,10 @@ use Illuminate\Console\Command;
 class SyncNewDataCommand extends Command
 {
     const STANDARD_SYMBOL = 'QQQ';
+    const INTERVAL = 'daily';
+    const SERIAL_TYPE = 'close';
+    const KD_PERIOD = 9;
+    const RSI_PERIOD = 14;
 
     /** @var StockService $stockService */
     private $stockService;
@@ -75,6 +79,23 @@ class SyncNewDataCommand extends Command
         Stock::with(['latest_daily_record' => function ($query) use ($latest_trading_day) {
 
             $query->where('date', $latest_trading_day);
+        }, 'daily_records' => function ($query) {
+
+            $query->orderBy('date', 'desc')
+                ->take(8);
+
+        }, 'kd_records' => function ($query) {
+
+            $query->orderBy('date', 'desc')
+                ->whereIn('interval', [self::INTERVAL])
+                ->whereIn('fastk_period', [self::KD_PERIOD])
+                ->take(2);
+
+        }, 'rsi_records' => function ($query) {
+            $query->orderBy('date', 'desc')
+                ->whereIn('interval', [self::INTERVAL])
+                ->whereIn('time_period', [self::RSI_PERIOD])
+                ->take(1);
         }])
             ->each(function ($stock) {
 
@@ -94,13 +115,23 @@ class SyncNewDataCommand extends Command
                 //更新股價、指標
                 if ($stock->quote_latest_refresh != $stock_quote['date']) {
 
+                    //計算當日KD
+                    $this->info("\n" . 'Calculate KD...');
                     $kd_indicator = $this->stochasticOscillatorService->calculateStochasticOscillator($stock, $stock_quote);
 
-                    $rsi_indicator = $this->relativeStrengthIndexService->calculateRSI($stock, $stock_quote);
+                    //計算當日RSI
+                    $this->info("\n" . 'Calculate RSI...');
+                    $rsi_indicator = $this->relativeStrengthIndexService->calculateRSI($stock, $stock_quote, self::RSI_PERIOD);
 
-                    $new_daily_record = array_merge($stock_quote, $kd_indicator, $rsi_indicator);
+                    //寫入DailyStockRecord
+                    $this->info("\n" . 'Migrate new data...');
+                    $new_daily_record = $this->dailyRecordService->firstOrCreateDailyRecordByStock($stock, $stock_quote);
 
-                    $this->dailyRecordService->firstOrCreateDailyRecordByStock($stock, $new_daily_record);
+                    //寫入KD Record
+                    $this->stochasticOscillatorService->firstOrCreateKDRecordByStock($stock, $new_daily_record, $kd_indicator);
+
+                    //寫入RSI Record
+                    $this->relativeStrengthIndexService->firstOrCreateRSIRecordByStock($stock, $new_daily_record, $rsi_indicator);
 
                     $stock->quote_latest_refresh = $stock_quote['date'];
                 }

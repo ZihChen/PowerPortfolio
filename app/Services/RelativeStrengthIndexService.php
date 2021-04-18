@@ -9,7 +9,9 @@
 namespace App\Services;
 
 
+use App\Models\DailyStockRecord;
 use App\Models\RelativeStrengthIndex;
+use App\Models\Stock;
 use Carbon\Carbon;
 
 class RelativeStrengthIndexService
@@ -158,58 +160,6 @@ class RelativeStrengthIndexService
         $this->rsiModel->insert($insert_fields);
     }
 
-    /**
-     * 計算RSI指標
-     * 公式:
-     * RSI = 100 - ( 100 / (1 + RS) )
-     * RS = avg_gain(N days) / avg_loss(N days)
-     *
-     * @param $stock
-     * @param $latest_quote
-     * @return array
-     */
-    public function calculateRSI($stock, $latest_quote)
-    {
-        $daily_records = $stock->daily_records()->take(14)->get();
-
-        $close_price_collect = ($daily_records->pluck('close_price')->reverse()->push($latest_quote['close_price']))->values();
-
-        $close_price_arr = $close_price_collect->toArray();
-
-        $avg_gain = [];
-
-        $avg_loss = [];
-
-        for ($count = 0; $count < 15; $count++) {
-
-            if ($count == 0) continue;
-
-            $diff_value = $close_price_arr[$count] - $close_price_arr[$count - 1];
-
-            if ($diff_value > 0) {
-
-                $avg_gain[] = $diff_value;
-
-            } elseif ($diff_value == 0) {
-
-                continue;
-
-            } else {
-
-                $avg_loss[] = $diff_value;
-
-            }
-        }
-
-        $rs = abs(array_sum($avg_gain) / array_sum($avg_loss));
-
-        $rsi = 100 - (100 / (1 + $rs));
-
-        return [
-            'rsi' => $rsi,
-        ];
-    }
-
     private function getClosePriceChange($change)
     {
         if ($change > 0) {
@@ -232,5 +182,72 @@ class RelativeStrengthIndexService
             $price_up,
             $price_fall,
         ];
+    }
+
+    /**
+     * 計算當日RSI指標
+     * AvgGain(N) = (AvGain(N - 1) * (N - 1 / N)) + (當日漲幅 * (1 / N))
+     * AvgLoss(N) = (AvgLoss(N - 1) * (N - 1/ N)) + (當跌漲幅 * (1 / N))
+     *
+     * step3.
+     * RS = AvgGain(N) / AvgLoss(N)
+     * RSI = 100 - ( 100 / (1 + RS))
+     *
+     * @param $stock
+     * @param $latest_quote
+     * @param $rsi_period
+     * @return array
+     */
+    public function calculateRSI($stock, $latest_quote, $rsi_period)
+    {
+        $previous_close_price = ($stock->daily_records->first())->close_price;
+
+        $change = $latest_quote['close_price'] - $previous_close_price;
+
+        list($price_up, $price_fall) = $this->getClosePriceChange($change);
+
+        $rsi_record = $stock->rsi_records->first();
+
+        $previous_avg_gain = $rsi_record->avg_gain;
+
+        $previous_avg_loss = $rsi_record->avg_loss;
+
+        $avg_gain = ($previous_avg_gain * (($rsi_period - 1) / $rsi_period)) + ($price_up * (1 / $rsi_period));
+
+        $avg_loss = ($previous_avg_loss * (($rsi_period - 1) / $rsi_period)) + ($price_fall * (1 / $rsi_period));
+
+        $rs = abs($avg_gain / $avg_loss);
+
+        $rsi = 100 - (100 / (1 + $rs));
+
+        return [
+            'rsi' => $rsi,
+            'avg_gain' => $avg_gain,
+            'avg_loss' => $avg_loss,
+        ];
+    }
+
+    /**
+     * @param Stock $stock => 股票
+     * @param DailyStockRecord $daily_record => 當日收盤股價
+     * @param array $rsi_indicator => 計算當日的AvgGain、AvgLoss、RSI
+     * @param string $interval => default:daily
+     * @param int $rsi_period => default:14
+     * @return mixed
+     */
+    public function firstOrCreateRSIRecordByStock($stock, $daily_record, $rsi_indicator, $interval = 'daily', $rsi_period = 14)
+    {
+        return $stock->rsi_records()->firstOrCreate([
+            'date' => $daily_record['date']
+        ], [
+            'record_id' => $daily_record['id'],
+            'date' => $daily_record['date'],
+            'series_type' => 'close',
+            'interval' => $interval,
+            'time_period' => $rsi_period,
+            'avg_gain' => $rsi_indicator['avg_gain'],
+            'avg_loss' => $rsi_indicator['avg_loss'],
+            'rsi' => $rsi_indicator['rsi'],
+        ]);
     }
 }

@@ -9,7 +9,9 @@
 namespace App\Services;
 
 
+use App\Models\DailyStockRecord;
 use App\Models\StochasticOscillator;
+use App\Models\Stock;
 use Carbon\Carbon;
 
 class StochasticOscillatorService
@@ -21,6 +23,12 @@ class StochasticOscillatorService
         $this->kdModel = $kdModel;
     }
 
+    /**
+     * @param Stock $stock => 股票
+     * @param array $kd_records => API回傳的100日kd歷史紀錄
+     * @param string $interval => default:daily
+     * @param int $kd_period => default:9
+     */
     public function insertKdIndicatorByDailyRecords($stock, $kd_records, $interval, $kd_period)
     {
         $now = Carbon::now();
@@ -87,7 +95,7 @@ class StochasticOscillatorService
      */
     public function calculateStochasticOscillator($stock, $latest_quote)
     {
-        $daily_records = $stock->daily_records()->take(8)->get();
+        $daily_records = $stock->daily_records;
 
         $highest_price = $daily_records->max('high_price');
 
@@ -99,16 +107,39 @@ class StochasticOscillatorService
 
         $rsv = ($latest_quote['close_price'] - $lowest_price) / ($highest_price - $lowest_price);
 
-        $latest_two_records = $daily_records->take(2);
+        $stochastic_k = ($stock->kd_records->pluck('rsv')->push($rsv)->avg() * 100);
 
-        $stochastic_k = ($latest_two_records->pluck('rsv')->push($rsv)->avg() * 100);
-
-        $stochastic_d = $latest_two_records->pluck('stochastic_k')->push($stochastic_k)->avg();
+        $stochastic_d = $stock->kd_records->pluck('stochastic_k')->push($stochastic_k)->avg();
 
         return [
             'rsv' => $rsv,
             'stochastic_k' => $stochastic_k,
             'stochastic_d' => $stochastic_d,
         ];
+    }
+
+    /**
+     * @param Stock $stock => 股票
+     * @param DailyStockRecord $daily_record => 當日收盤股價
+     * @param array $kd_indicator => 計算當日的kd、rsv
+     * @param string $interval => default:daily
+     * @param int $kd_period => default:9
+     * @return mixed
+     */
+    public function firstOrCreateKDRecordByStock($stock, $daily_record, $kd_indicator, $interval = 'daily', $kd_period = 9)
+    {
+        return $stock->kd_records()->firstOrCreate([
+            'date' => $daily_record['date']
+        ],[
+            'record_id' => $daily_record['id'],
+            'date' => $daily_record['date'],
+            'interval' => $interval,
+            'fastk_period' => $kd_period,
+            'slowk_period' => 3,
+            'slowd_period' => 3,
+            'rsv' => $kd_indicator['rsv'],
+            'stochastic_k' => $kd_indicator['stochastic_k'],
+            'stochastic_d' => $kd_indicator['stochastic_d'],
+        ]);
     }
 }
