@@ -59,20 +59,43 @@ class DashboardController
 
             $stock_position = $stock_positions->where('stock_id', $stock->id)->first();
 
+            $close_price = empty($latest_daily_record->close_price) ? 0.0 : $latest_daily_record->close_price;
+
+            $units = empty($stock_position) ? 0.0 : $stock_position->units;
+
+            $invested = empty($stock_position->units) || empty($stock_position->avg_open) ? 0.0 : ($stock_position->units * $stock_position->avg_open);
+
+            $value_price = $units * $close_price;
+
+            $profit_loss_value = $value_price - $invested;
+
+            $profit_loss_percent = null;
+
+            if ($profit_loss_value + $invested == 0) {
+
+                $profit_loss_percent = 0.0;
+            } else {
+
+                $profit_loss_percent = round(($profit_loss_value / $invested) * 100, 2);
+            }
+
             return [
                 'id' => $stock->id,
                 'symbol' => $stock->symbol,
                 'name' => $stock->name,
                 'type' => $stock->type,
-                'close_price' => $latest_daily_record->close_price,
+                'close_price' => $close_price,
                 'change_percent' => $latest_daily_record->change_percent,
                 'stochastic_k' => optional($kd_record)->stochastic_k,
                 'stochastic_d' => optional($kd_record)->stochastic_d,
                 'rsi' => optional($rsi_record)->rsi,
                 'date' => $latest_daily_record->date,
-                'invested' => empty($stock_position) ? 0.0 : $stock_position->invested,
-                'target_position' => empty($stock_position) ? 0.0 : $stock_position->target_position,
+                'units' => $units,
                 'avg_open' => empty($stock_position) ? 0.0 : $stock_position->avg_open,
+                'invested' => $invested,
+                'profit_loss_percent' => $profit_loss_percent,
+                'profit_loss_value' => $profit_loss_value,
+                'target_position' => empty($stock_position) ? 0.0 : $stock_position->target_position,
             ];
         });
 

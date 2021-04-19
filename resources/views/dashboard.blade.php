@@ -27,9 +27,12 @@
                 <th scope="col">D值</th>
                 <th scope="col">RSI</th>
                 <th scope="col">更新日期</th>
-                <th scope="col">投資總額</th>
                 <th scope="col">目標倉位</th>
+                <th scope="col">投資單位</th>
                 <th scope="col">平均開倉價</th>
+                <th scope="col">投資總額</th>
+                <th scope="col">損益百分比</th>
+                <th scope="col">損益總額</th>
             </tr>
             </thead>
             <tbody>
@@ -45,9 +48,12 @@
                     <td>{{$stock['stochastic_d']}}</td>
                     <td>{{$stock['rsi']}}</td>
                     <td>{{$stock['date']}}</td>
-                    <td>${{$stock['invested']}}</td>
                     <td>{{$stock['target_position']}}%</td>
+                    <td>${{$stock['units']}}</td>
                     <td>${{$stock['avg_open']}}</td>
+                    <td>${{$stock['invested']}}</td>
+                    <td>${{$stock['profit_loss_percent']}}</td>
+                    <td>${{$stock['profit_loss_value']}}</td>
                 </tr>
             @endforeach
             </tbody>
@@ -64,7 +70,7 @@
         margin-top: 10px;
     }
     .table-group {
-        width: 150%;
+        width: 120%;
         margin-top: 50px;
     }
     .search-bar-group {
