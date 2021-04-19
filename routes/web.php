@@ -31,6 +31,11 @@ Route::group(['middleware' => 'auth'], function () {
 
     Route::get('dashboard', [DashboardController::class, 'getDashboard']);
 
+    Route::group(['prefix' => 'stocks'], function () {
+
+        Route::get('search', [DashboardController::class, 'autocompleteSearch']);
+    });
+
     Route::get('user', [AuthController::class, 'getUser']);
 
     Route::get('logout', [AuthController::class, 'logout']);

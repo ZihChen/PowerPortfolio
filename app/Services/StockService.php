@@ -49,4 +49,11 @@ class StockService
     {
         return $user->stocks()->with($relation_fields)->get();
     }
+
+    public function getMatchStocksByKeyword($keyword)
+    {
+        return $this->stockModel->where('symbol', 'like', $keyword . '%')
+            ->orWhere('name', 'like', $keyword . '%')
+            ->get();
+    }
 }

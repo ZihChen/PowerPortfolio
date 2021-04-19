@@ -25,6 +25,13 @@ class DashboardController
         $this->userStockPositionService = $userStockPositionService;
     }
 
+    public function autocompleteSearch(Request $request)
+    {
+        $result = $this->stockService->getMatchStocksByKeyword($request->get('keyword'));
+
+        return response()->json($result);
+    }
+
     public function getDashboard(Request $request)
     {
         $user = $request->user();
