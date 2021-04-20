@@ -79,23 +79,6 @@ class SyncNewDataCommand extends Command
         Stock::with(['latest_daily_record' => function ($query) use ($latest_trading_day) {
 
             $query->where('date', $latest_trading_day);
-        }, 'daily_records' => function ($query) {
-
-            $query->orderBy('date', 'desc')
-                ->take(8);
-
-        }, 'kd_records' => function ($query) {
-
-            $query->orderBy('date', 'desc')
-                ->whereIn('interval', [self::INTERVAL])
-                ->whereIn('fastk_period', [self::KD_PERIOD])
-                ->take(2);
-
-        }, 'rsi_records' => function ($query) {
-            $query->orderBy('date', 'desc')
-                ->whereIn('interval', [self::INTERVAL])
-                ->whereIn('time_period', [self::RSI_PERIOD])
-                ->take(1);
         }])
             ->each(function ($stock) {
 
@@ -105,6 +88,24 @@ class SyncNewDataCommand extends Command
 
                     return true;   //若此檔股票有最新收盤資訊則跳過
                 }
+
+                $stock->load([
+                    'daily_records' => function ($query) {
+                        $query->orderBy('date', 'desc')
+                            ->take(8);
+                    },
+                    'kd_records' => function ($query) {
+                        $query->orderBy('date', 'desc')
+                            ->whereIn('interval', [self::INTERVAL])
+                            ->where('fastk_period', [self::KD_PERIOD])
+                            ->take(2);
+                    },
+                    'rsi_records' => function ($query) {
+                        $query->orderBy('date', 'desc')
+                            ->whereIn('interval', [self::INTERVAL])
+                            ->whereIn('time_period', [self::RSI_PERIOD])
+                            ->take(1);
+                    }]);
 
                 $stock_symbol = $stock->symbol;
 
@@ -144,6 +145,7 @@ class SyncNewDataCommand extends Command
 
                     if ($stock->fiscal_latest_refresh != $fiscal_info['latest_refresh']) {
 
+                        $this->info("\n" . 'Migrate new fiscal overview...');
                         $this->fiscalOverviewService->firstOrCreateFiscalOverview($stock, $fiscal_info);
 
                         $stock->fiscal_latest_refresh = $fiscal_info['latest_refresh'];
