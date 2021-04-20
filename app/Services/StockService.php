@@ -56,4 +56,9 @@ class StockService
             ->orWhere('name', 'like', $keyword . '%')
             ->get();
     }
+
+    public function getStockById($stock_id, $relation_fields = [])
+    {
+        return $this->stockModel->with($relation_fields)->find($stock_id);
+    }
 }

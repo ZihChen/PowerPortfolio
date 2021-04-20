@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\StockController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -33,7 +34,9 @@ Route::group(['middleware' => 'auth'], function () {
 
     Route::group(['prefix' => 'stocks'], function () {
 
-        Route::get('search', [DashboardController::class, 'autocompleteSearch']);
+        Route::get('search', [StockController::class, 'autocompleteSearch']);
+
+        Route::post('{stock_id}', [StockController::class, 'autocompleteSearch']);
     });
 
     Route::get('user', [AuthController::class, 'getUser']);
