@@ -1,18 +1,13 @@
 
 @include('layouts.bootstrap_cdn')
+
 <div class="main">
-    <div class="input-group">
-        <form class="form-inline my-2 my-lg-0" role="search" method="get" action="/" target="_blank">
-            <div class='search-bar-group'>
-                <div class='input-text'>
-                    <input type="text" class="form-control" name="keyword" placeholder="search">
-                </div>
-                <div class='submit-btn'>
-                    <button type="submit" class="btn btn-secondary">搜尋</button>
-                </div>
-            </div>
-        </form>
-    </div>
+    <form autocomplete="off" action="/action_page.php">
+        <div class="autocomplete" style="width:250px;">
+            <input id="myInput" type="text" name="myCountry" placeholder="代號">
+        </div>
+        <input type="submit">
+    </form>
     <div class="table-group">
         <table class="table table-hover">
             <thead>
@@ -62,23 +57,155 @@
 </div>
 
 <style>
-    .form-inline {
-        position:fixed;
-        margin-left: 20px;
-    }
     .main {
-        margin-top: 10px;
+        margin-top: 20px;
+        margin-left: 20px;
+        margin-right: 20px;
     }
     .table-group {
         width: 120%;
-        margin-top: 50px;
+        margin-top: 20px;
     }
-    .search-bar-group {
-        width: 500px;
+    * { box-sizing: border-box; }
+    body {
+        font: 16px Arial;
     }
-    .input-text, .submit-btn {
+    .autocomplete {
+        position: relative;
         display: inline-block;
-        width: 200px;
-        height: 50px;
     }
+    input {
+        border: 1px solid transparent;
+        background-color: #f1f1f1;
+        padding: 10px;
+        font-size: 16px;
+    }
+    input[type=text] {
+        background-color: #f1f1f1;
+        width: 100%;
+    }
+    input[type=submit] {
+        background-color: DodgerBlue;
+        color: #fff;
+    }
+    .autocomplete-items {
+        position: absolute;
+        border: 1px solid #d4d4d4;
+        border-bottom: none;
+        border-top: none;
+        z-index: 99;
+        top: 100%;
+        left: 0;
+        right: 0;
+    }
+    .autocomplete-items div {
+        padding: 10px;
+        cursor: pointer;
+        background-color: #fff;
+        border-bottom: 1px solid #d4d4d4;
+    }
+    .autocomplete-items div:hover {
+        background-color: #e9e9e9;
+    }
+
 </style>
+
+<script>
+    function autocomplete(inp) {
+        var currentFocus;
+        inp.addEventListener("input", function(e) {
+
+            var a, b, i, val = this.value;
+
+            closeAllLists();
+            if (!val) { return false;}
+            currentFocus = -1;
+            a = document.createElement("DIV");
+            a.setAttribute("id", this.id + "autocomplete-list");
+            a.setAttribute("class", "autocomplete-items");
+
+            this.parentNode.appendChild(a);
+            const match_stock = fetch('stocks/search?'+ new URLSearchParams({
+                keyword: this.value,
+            }))
+                .then(function(response) {
+
+                    return response.json();
+
+                })
+                .then(function(myJson) {
+
+                    this.data = myJson
+
+                    return this.data
+                });
+
+            Promise.resolve(match_stock).then(function(result) {
+
+                for (i = 0; i <= result.length - 1; i++) {
+
+                    b = document.createElement("DIV");
+
+                    b.innerHTML += "<b>" + result[i].symbol + "</br>"
+                    b.innerHTML += result[i].name;
+                    b.innerHTML += "<input type='hidden' value='" + result[i].symbol + "'>";
+
+                    b.addEventListener("click", function(e) {
+                        inp.value = this.getElementsByTagName("input")[0].value;
+                        closeAllLists();
+                    });
+
+                    a.appendChild(b);
+                }
+            })
+
+        });
+
+        inp.addEventListener("keydown", function(e) {
+            var x = document.getElementById(this.id + "autocomplete-list");
+            if (x) x = x.getElementsByTagName("div");
+            if (e.keyCode == 40) {
+                currentFocus++;
+                addActive(x);
+            } else if (e.keyCode == 38) {
+                currentFocus--;
+                addActive(x);
+            } else if (e.keyCode == 13) {
+                e.preventDefault();
+                if (currentFocus > -1) {
+
+                    if (x) x[currentFocus].click();
+                }
+            }
+        });
+
+        function addActive(x) {
+            if (!x) return false;
+            removeActive(x);
+            if (currentFocus >= x.length) currentFocus = 0;
+            if (currentFocus < 0) currentFocus = (x.length - 1);
+            x[currentFocus].classList.add("autocomplete-active");
+        }
+
+        function removeActive(x) {
+            for (var i = 0; i < x.length; i++) {
+                x[i].classList.remove("autocomplete-active");
+            }
+        }
+
+        function closeAllLists(elmnt) {
+            var x = document.getElementsByClassName("autocomplete-items");
+            for (var i = 0; i < x.length; i++) {
+                if (elmnt != x[i] && elmnt != inp) {
+                    x[i].parentNode.removeChild(x[i]);
+                }
+            }
+        }
+
+        document.addEventListener("click", function (e) {
+            closeAllLists(e.target);
+        });
+    }
+
+    autocomplete(document.getElementById("myInput"));
+</script>
