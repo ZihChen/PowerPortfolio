@@ -36,4 +36,10 @@ class UserStockService
             'sort' => $sort,
         ]);
     }
+
+    public function detachStockByUser($user, $stock_id)
+    {
+        $this->userStockMapsModel->where('user_id', $user->id)
+            ->where('stock_id', $stock_id)->delete();
+    }
 }

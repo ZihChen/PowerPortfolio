@@ -38,4 +38,17 @@ class StockController extends Controller
 
         return redirect('/dashboard');
     }
+
+    public function removeUserStockRelation(Request $request)
+    {
+        $user = $request->user();
+
+        $stock_id = $request->route('stock_id');
+
+        $stock = $this->stockService->getStockById($stock_id);
+
+        $this->userStockService->detachStockByUser($user, $stock->id);
+
+        return redirect('/dashboard');
+    }
 }

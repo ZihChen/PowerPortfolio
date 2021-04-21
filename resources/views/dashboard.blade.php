@@ -27,6 +27,7 @@
                 <th scope="col">投資總額</th>
                 <th scope="col">損益百分比</th>
                 <th scope="col">損益總額</th>
+                <th scope="col"></th>
             </tr>
             </thead>
             <tbody>
@@ -48,6 +49,11 @@
                     <td>${{$stock['invested']}}</td>
                     <td>${{$stock['profit_loss_percent']}}</td>
                     <td>${{$stock['profit_loss_value']}}</td>
+                    <td>
+                        <a href="/stocks/{{$stock['id']}}/delete" data-method="delete">
+                            <i class="far fa-trash-alt"></i>
+                        </a>
+                    </td>
                 </tr>
             @endforeach
             </tbody>
@@ -109,10 +115,10 @@
     .autocomplete-items div:hover {
         background-color: #e9e9e9;
     }
-
 </style>
 
 <script>
+
     function autocomplete(inp) {
         var currentFocus;
         inp.addEventListener("input", function(e) {
