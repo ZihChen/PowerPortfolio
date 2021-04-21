@@ -1,8 +1,10 @@
 Power Portfolio 美股績效管理工具
 ---
 ![GitHub last commit](https://img.shields.io/github/last-commit/ZihChen/PowerPortfolio)
+![Github repo size](https://img.shields.io/github/repo-size/ZihChen/PowerPortfolio)
+![GitHub top language](https://img.shields.io/github/languages/top/ZihChen/PowerPortfolio)
+![Lines of code](https://img.shields.io/tokei/lines/github/ZihChen/PowerPortfolio)
 [![contributions welcome](https://img.shields.io/badge/contributions-welcome-brightgreen.svg?style=flat)](https://github.com/navendu-pottekkat/virtual-drums/issues)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 快速瀏覽自訂股票清單的工具
 
@@ -43,6 +45,18 @@ php artisan init:data --file_path=app/Form/stock_symbols_01.xlsx
 ```
 
 ## 功能
+- [x] 會員註冊登入
+- [x] 每日更新收盤價以及技術指標
+- [x] 搜尋股票標的
+- [x] 自訂股票觀察清單
+- [x] 紀錄個人持有股票部位及計算損益
+- [ ] 觀察清單依照欄位做排序
+- [ ] 觀察清單分頁顯示
+- [ ] 觀察清單刪除股票
+- [ ] 動態止盈止損價顯示
+- [ ] 股票基本面資訊
+- [ ] 技術指標圖形化
+- [ ] 自動交易策略設定
 
 ## 架構
 
