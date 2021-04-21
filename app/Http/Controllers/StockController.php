@@ -30,12 +30,12 @@ class StockController extends Controller
     {
         $user = $request->user();
 
-        $stock_id = $request->route('stock_id');
+        $symbol = $request->input('symbol');
 
-        $stock = $this->stockService->getStockById($stock_id);
+        $stock = $this->stockService->getStockBySymbol($symbol);
 
         $this->userStockService->attachStockByUser($user, $stock->id);
 
-        return $this->response(['success']);
+        return redirect('/dashboard');
     }
 }

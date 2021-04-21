@@ -61,4 +61,9 @@ class StockService
     {
         return $this->stockModel->with($relation_fields)->find($stock_id);
     }
+
+    public function getStockBySymbol($symbol, $relation_fields = [])
+    {
+        return $this->stockModel->with($relation_fields)->where('symbol', $symbol)->first();
+    }
 }

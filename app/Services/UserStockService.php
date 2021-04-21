@@ -8,11 +8,32 @@
 
 namespace App\Services;
 
+use App\Models\UserStockMaps;
 
 class UserStockService
 {
+    protected $userStockMapsModel;
+
+    public function __construct(UserStockMaps $userStockMapsModel)
+    {
+        $this->userStockMapsModel = $userStockMapsModel;
+    }
+
     public function attachStockByUser($user, $stock_id)
     {
-        $user->stocks()->attach($stock_id);
+        $stocks = $user->stocks;
+
+        $maps = $this->userStockMapsModel->where('user_id', $user->id)->get();
+
+        $sort = $stocks->isEmpty() ? 0 : $maps->max('sort') + 1;
+
+        $this->userStockMapsModel->firstOrCreate([
+            'user_id' => $user->id,
+            'stock_id' => $stock_id,
+        ], [
+            'user_id' => $user->id,
+            'stock_id' => $stock_id,
+            'sort' => $sort,
+        ]);
     }
 }

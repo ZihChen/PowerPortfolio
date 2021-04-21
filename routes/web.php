@@ -36,7 +36,7 @@ Route::group(['middleware' => 'auth'], function () {
 
         Route::get('search', [StockController::class, 'autocompleteSearch']);
 
-        Route::post('{stock_id}', [StockController::class, 'autocompleteSearch']);
+        Route::post('/', [StockController::class, 'postUserStockRelation']);
     });
 
     Route::get('user', [AuthController::class, 'getUser']);

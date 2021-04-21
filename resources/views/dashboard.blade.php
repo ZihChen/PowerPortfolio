@@ -2,9 +2,9 @@
 @include('layouts.bootstrap_cdn')
 
 <div class="main">
-    <form autocomplete="off" action="/action_page.php">
+    <form autocomplete="off" action="{{"/stocks"}}" method="post">
         <div class="autocomplete" style="width:250px;">
-            <input id="myInput" type="text" name="myCountry" placeholder="代號">
+            <input id="myInput" type="text" name="symbol" placeholder="代號">
         </div>
         <input type="submit">
     </form>
