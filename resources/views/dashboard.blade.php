@@ -14,7 +14,6 @@
             <tr>
                 <th scope="col">#</th>
                 <th scope="col">代號</th>
-                <th scope="col">名稱</th>
                 <th scope="col">股票類型</th>
                 <th scope="col">收盤價</th>
                 <th scope="col">股價漲跌幅</th>
@@ -34,8 +33,8 @@
             @foreach($stocks as $key => $stock)
                 <tr>
                     <th scope="row">{{$key + 1}}</th>
-                    <td>{{$stock['symbol']}}</td>
-                    <td>{{$stock['name']}}</td>
+                    <td><strong>{{$stock['symbol']}}</strong><br>
+                        {{$stock['name']}}</td>
                     <td>{{$stock['type']}}</td>
                     <td>{{$stock['close_price']}}</td>
                     <td>{{$stock['change_percent']}}%</td>
@@ -44,7 +43,7 @@
                     <td>{{$stock['rsi']}}</td>
                     <td>{{$stock['date']}}</td>
                     <td>{{$stock['target_position']}}%</td>
-                    <td>${{$stock['units']}}</td>
+                    <td>{{$stock['units']}}</td>
                     <td>${{$stock['avg_open']}}</td>
                     <td>${{$stock['invested']}}</td>
                     <td>${{$stock['profit_loss_percent']}}</td>
@@ -62,8 +61,11 @@
         margin-left: 20px;
         margin-right: 20px;
     }
+    .table {
+        font-size: small;
+    }
     .table-group {
-        width: 120%;
+        width: 100%;
         margin-top: 20px;
     }
     * { box-sizing: border-box; }
@@ -146,9 +148,9 @@
 
                     b = document.createElement("DIV");
 
-                    b.innerHTML += "<b>" + result[i].symbol + "</br>"
-                    b.innerHTML += result[i].name;
-                    b.innerHTML += "<input type='hidden' value='" + result[i].symbol + "'>";
+                    b.innerHTML += "<strong style='font-size: small'>" + result[i].symbol + "</br>"
+                    b.innerHTML += "<a style='font-size: smaller'>"+ result[i].name;
+                    b.innerHTML += "<input style='font-size: small' type='hidden' value='" + result[i].symbol + "'>";
 
                     b.addEventListener("click", function(e) {
                         inp.value = this.getElementsByTagName("input")[0].value;
