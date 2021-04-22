@@ -6,7 +6,25 @@
         <div class="autocomplete" style="width:250px;">
             <input id="myInput" type="text" name="symbol" placeholder="代號">
         </div>
-        <input type="submit">
+        <input type="submit" name="click">
+    </form>
+    <form class="row-form" action="{{"/dashboard"}}" method="get">
+        <div class="sort-btn">
+            <input type="submit" class="btn btn-primary mb-3" value="確認">
+        </div>
+        <div class="right">
+            <select class="form-select" aria-label="Default select example" name="order">
+                <option value="asc">由低到高</option>
+                <option value="desc">由高到低</option>
+            </select>
+        </div>
+        <div class="left">
+            <select class="form-select" aria-label="Default select example" name="column">
+                <option value="symbol">代號</option>
+                <option value="rsi">RSI</option>
+                <option value="change_percent">漲跌幅</option>
+            </select>
+        </div>
     </form>
     <div class="table-group">
         <table class="table table-hover">
@@ -67,6 +85,24 @@
         margin-left: 20px;
         margin-right: 20px;
     }
+    .left {
+        height: 40px;
+        width: 150px;
+        margin-left: 10px;
+        float: right;
+    }
+    .right {
+        height: 40px;
+        width: 150px;
+        margin-left: 10px;
+        float: right;
+    }
+    .sort-btn {
+        height: 40px;
+        width: 100px;
+        margin-left: 10px;
+        float: right;
+    }
     .table {
         font-size: small;
     }
@@ -118,7 +154,6 @@
 </style>
 
 <script>
-
     function autocomplete(inp) {
         var currentFocus;
         inp.addEventListener("input", function(e) {

@@ -29,6 +29,10 @@ class DashboardController
     {
         $user = $request->user();
 
+        $select_option_column = $request->get('column', 'symbol');
+
+        $select_option_order = $request->get('order', 'asc');
+
         $interval = $request->get('interval', 'daily');
 
         $kd_period = $request->get('kd_period', 9);
@@ -98,6 +102,16 @@ class DashboardController
                 'target_position' => empty($stock_position) ? 0.0 : $stock_position->target_position,
             ];
         });
+
+        $stocks = $stocks->toArray();
+
+        if ($select_option_order == 'asc') {
+            $sort_arg = 4;
+        } else {
+            $sort_arg = 3;
+        }
+
+        array_multisort(array_column($stocks, $select_option_column), $sort_arg, $stocks);
 
         return view('dashboard', ['stocks' => $stocks]);
     }
