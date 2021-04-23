@@ -32,7 +32,6 @@
             <tr>
                 <th scope="col">#</th>
                 <th scope="col">代號</th>
-                <th scope="col">股票類型</th>
                 <th scope="col">收盤價</th>
                 <th scope="col">股價漲跌幅</th>
                 <th scope="col">K值</th>
@@ -52,9 +51,16 @@
             @foreach($stocks as $key => $stock)
                 <tr>
                     <th scope="row">{{$key + 1}}</th>
-                    <td><strong>{{$stock['symbol']}}</strong><br>
-                        {{$stock['name']}}</td>
-                    <td>{{$stock['type']}}</td>
+                        <td>@if ($stock['type'] == 'Equity')
+                            <i class="fas fa-cube"></i>
+                            @else
+                            <i class="fas fa-cubes"></i>
+                            @endif
+                            <strong>
+                                {{$stock['symbol']}}
+                            </strong><br>
+                            {{$stock['name']}}
+                        </td>
                     <td>{{$stock['close_price']}}</td>
                     <td>{{$stock['change_percent']}}%</td>
                     <td>{{$stock['stochastic_k']}}</td>
@@ -104,10 +110,10 @@
         float: right;
     }
     .table {
-        font-size: small;
+        font-size: smaller;
     }
     .table-group {
-        width: 100%;
+        width: 120%;
         margin-top: 20px;
     }
     * { box-sizing: border-box; }
@@ -154,6 +160,7 @@
 </style>
 
 <script>
+
     function autocomplete(inp) {
         var currentFocus;
         inp.addEventListener("input", function(e) {
