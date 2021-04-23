@@ -66,4 +66,12 @@ class StockService
     {
         return $this->stockModel->with($relation_fields)->where('symbol', $symbol)->first();
     }
+
+    public function getStocksByPaginate($user, $page, $limit, $relation_fields = [])
+    {
+        return $user->stocks()->with($relation_fields)
+            ->offset($limit * ($page - 1))
+            ->limit($limit)
+            ->get();
+    }
 }

@@ -42,4 +42,9 @@ class UserStockService
         $this->userStockMapsModel->where('user_id', $user->id)
             ->where('stock_id', $stock_id)->delete();
     }
+
+    public function getUserStockCount($user)
+    {
+        return $user->stocks()->count();
+    }
 }

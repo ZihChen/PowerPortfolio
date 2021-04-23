@@ -12,20 +12,32 @@ use Illuminate\Http\Request;
 use App\Services\StockService;
 use App\Models\UserStockPositionService;
 use App\Services\YahooFinanceService;
+use App\Services\UserStockService;
 
 class DashboardController
 {
     protected $stockService;
 
+    protected $userStockService;
+
     protected $userStockPositionService;
 
     protected $yahooFinanceService;
 
+    /**
+     * DashboardController constructor.
+     * @param StockService $stockService
+     * @param UserStockService $userStockService
+     * @param UserStockPositionService $userStockPositionService
+     * @param YahooFinanceService $yahooFinanceService
+     */
     public function __construct(StockService $stockService,
+                                UserStockService $userStockService,
                                 UserStockPositionService $userStockPositionService,
                                 YahooFinanceService $yahooFinanceService)
     {
         $this->stockService = $stockService;
+        $this->userStockService = $userStockService;
         $this->userStockPositionService = $userStockPositionService;
         $this->yahooFinanceService = $yahooFinanceService;
     }
@@ -33,6 +45,10 @@ class DashboardController
     public function getDashboard(Request $request)
     {
         $user = $request->user();
+
+        $current_page = $request->get('page', 1);
+
+        $limit = $request->get('limit', 15);
 
         $select_option_column = $request->get('column', 'symbol');
 
@@ -46,7 +62,11 @@ class DashboardController
 
         $latest_trade_date = $this->yahooFinanceService->getLatestTradeDate();
 
-        $stocks = $this->stockService->getStocksByUser($user, [
+        $stock_count = $this->userStockService->getUserStockCount($user);
+
+        $total_pages = ceil($stock_count / $limit);    //總頁數
+
+        $stocks = $this->stockService->getStocksByPaginate($user, $current_page, $limit, [
             'latest_daily_record'
         ]);
 
@@ -118,6 +138,10 @@ class DashboardController
             $stocks = $stocks->sortByDesc($select_option_column);
         }
 
-        return view('dashboard', ['stocks' => $stocks]);
+        return view('dashboard', [
+            'stocks' => $stocks,
+            'total_pages' => $total_pages,
+            'current_page' => $current_page,
+        ]);
     }
 }

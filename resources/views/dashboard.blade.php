@@ -90,14 +90,15 @@
         </table>
     </div>
     <div class="pagination">
-        <a href="#">&laquo;</a>
-        <a href="#">1</a>
-        <a class="active" href="#">2</a>
-        <a href="#">3</a>
-        <a href="#">4</a>
-        <a href="#">5</a>
-        <a href="#">6</a>
-        <a href="#">&raquo;</a>
+        <a href="dashboard?page={{$current_page - 1}}">&laquo;</a>
+        @for($i = 1 ; $i <= $total_pages ; $i++)
+            @if ($current_page == $i)
+                <a class="active" href="#">{{$i}}</a>
+            @else
+                <a href="dashboard?page={{$i}}">{{$i}}</a>
+            @endif
+        @endfor
+        <a href="dashboard?page={{$current_page + 1}}">&raquo;</a>
     </div>
 </div>
 
