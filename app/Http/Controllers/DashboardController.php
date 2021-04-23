@@ -83,7 +83,7 @@ class DashboardController
                 $profit_loss_percent = round(($profit_loss_value / $invested) * 100, 2);
             }
 
-            return [
+            return collect([
                 'id' => $stock->id,
                 'symbol' => $stock->symbol,
                 'name' => $stock->name,
@@ -100,18 +100,15 @@ class DashboardController
                 'profit_loss_percent' => round($profit_loss_percent, 2),
                 'profit_loss_value' => round($profit_loss_value, 2),
                 'target_position' => empty($stock_position) ? 0.0 : $stock_position->target_position,
-            ];
+            ]);
         });
 
-        $stocks = $stocks->toArray();
 
         if ($select_option_order == 'asc') {
-            $sort_arg = 4;
+            $stocks = $stocks->sortBy($select_option_column);
         } else {
-            $sort_arg = 3;
+            $stocks = $stocks->sortByDesc($select_option_column);
         }
-
-        array_multisort(array_column($stocks, $select_option_column), $sort_arg, $stocks);
 
         return view('dashboard', ['stocks' => $stocks]);
     }

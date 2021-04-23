@@ -8,24 +8,22 @@
         </div>
         <input type="submit" name="click">
     </form>
-    <form class="row-form" action="{{"/dashboard"}}" method="get">
-        <div class="sort-btn">
-            <input type="submit" class="btn btn-primary mb-3" value="確認">
-        </div>
-        <div class="right">
-            <select class="form-select" aria-label="Default select example" name="order">
-                <option value="asc">由低到高</option>
-                <option value="desc">由高到低</option>
-            </select>
-        </div>
-        <div class="left">
-            <select class="form-select" aria-label="Default select example" name="column">
-                <option value="symbol">代號</option>
-                <option value="rsi">RSI</option>
-                <option value="change_percent">漲跌幅</option>
-            </select>
-        </div>
-    </form>
+    <div class="sort-btn">
+        <input type="submit" class="btn btn-primary mb-3" value="確認" onclick="sort()">
+    </div>
+    <div class="right">
+        <select id="option-order" class="form-select" aria-label="Default select example" name="order">
+            <option value="asc">由低到高</option>
+            <option value="desc">由高到低</option>
+        </select>
+    </div>
+    <div class="left">
+        <select id="option-column" class="form-select" aria-label="Default select example" name="column">
+            <option value="symbol">代號</option>
+            <option value="rsi">RSI</option>
+            <option value="change_percent">漲跌幅</option>
+        </select>
+    </div>
     <div class="table-group">
         <table class="table table-hover">
             <thead>
@@ -37,7 +35,6 @@
                 <th scope="col">K值</th>
                 <th scope="col">D值</th>
                 <th scope="col">RSI</th>
-                <th scope="col">更新日期</th>
                 <th scope="col">目標倉位</th>
                 <th scope="col">投資單位</th>
                 <th scope="col">平均開倉價</th>
@@ -66,7 +63,6 @@
                     <td>{{$stock['stochastic_k']}}</td>
                     <td>{{$stock['stochastic_d']}}</td>
                     <td>{{$stock['rsi']}}</td>
-                    <td>{{$stock['date']}}</td>
                     <td>{{$stock['target_position']}}%</td>
                     <td>{{$stock['units']}}</td>
                     <td>${{$stock['avg_open']}}</td>
@@ -113,7 +109,7 @@
         font-size: smaller;
     }
     .table-group {
-        width: 120%;
+        width: 100%;
         margin-top: 20px;
     }
     * { box-sizing: border-box; }
@@ -160,6 +156,16 @@
 </style>
 
 <script>
+    function sort() {
+
+        var o = document.getElementById("option-order");
+        var order_value = o.value;
+
+        var c = document.getElementById("option-column");
+        var column_value = c.value;
+
+        window.location.href = '/dashboard?' + 'column=' + column_value + '&' + 'order=' + order_value;
+    }
 
     function autocomplete(inp) {
         var currentFocus;
