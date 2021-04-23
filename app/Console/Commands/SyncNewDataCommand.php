@@ -3,6 +3,7 @@
 namespace App\Console\Commands;
 
 use App\Models\Stock;
+use App\Services\YahooFinanceService;
 use App\Services\AlphaAdvantageService;
 use App\Services\DailyRecordService;
 use App\Services\FiscalOverviewService;
@@ -21,6 +22,8 @@ class SyncNewDataCommand extends Command
 
     /** @var StockService $stockService */
     private $stockService;
+    /** @var YahooFinanceService $yahooFinanceService */
+    private $yahooFinanceService;
     /** @var AlphaAdvantageService $alphaAdvantageService */
     private $alphaAdvantageService;
     /** @var FiscalOverviewService $fiscalOverviewService */
@@ -56,6 +59,7 @@ class SyncNewDataCommand extends Command
         parent::__construct();
 
         $this->stockService = app(StockService::class);
+        $this->yahooFinanceService = app(YahooFinanceService::class);
         $this->alphaAdvantageService = app(AlphaAdvantageService::class);
         $this->fiscalOverviewService = app(FiscalOverviewService::class);
         $this->dailyRecordService = app(DailyRecordService::class);
@@ -72,7 +76,7 @@ class SyncNewDataCommand extends Command
     public function handle()
     {
         //取得最後一次收盤的日期
-        $res = $this->alphaAdvantageService->getStockLatestQuote(self::STANDARD_SYMBOL);
+        $res = $this->yahooFinanceService->getQuoteBySymbol(self::STANDARD_SYMBOL);
 
         $latest_trading_day = $res['date'];
 

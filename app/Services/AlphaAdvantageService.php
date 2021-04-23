@@ -9,7 +9,7 @@
 namespace App\Services;
 
 
-use App\AlphaAdvantage\AlphaAdvantageAPI;
+use App\ThirdPartyAPI\AlphaAdvantageAPI;
 use App\Traits\ErrorResponseCodeTrait;
 use App\Traits\ErrorResponseMsgTrait;
 use Carbon\Carbon;

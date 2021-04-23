@@ -6,7 +6,7 @@
  * Time: 21:32
  */
 
-namespace App\AlphaAdvantage;
+namespace App\ThirdPartyAPI;
 
 
 use GuzzleHttp\Client;
