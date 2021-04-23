@@ -11,6 +11,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Services\StockService;
 use App\Models\UserStockPositionService;
+use App\Services\YahooFinanceService;
 
 class DashboardController
 {
@@ -18,11 +19,15 @@ class DashboardController
 
     protected $userStockPositionService;
 
+    protected $yahooFinanceService;
+
     public function __construct(StockService $stockService,
-                                UserStockPositionService $userStockPositionService)
+                                UserStockPositionService $userStockPositionService,
+                                YahooFinanceService $yahooFinanceService)
     {
         $this->stockService = $stockService;
         $this->userStockPositionService = $userStockPositionService;
+        $this->yahooFinanceService = $yahooFinanceService;
     }
 
     public function getDashboard(Request $request)
@@ -39,13 +44,15 @@ class DashboardController
 
         $rsi_period = $request->get('rsi_period', 14);
 
+        $latest_trade_date = $this->yahooFinanceService->getLatestTradeDate();
+
         $stocks = $this->stockService->getStocksByUser($user, [
             'latest_daily_record'
         ]);
 
         $stock_positions = $this->userStockPositionService->getStockPositionsByUser($user);
 
-        $stocks = $stocks->map(function ($stock) use ($stock_positions, $interval, $kd_period, $rsi_period) {
+        $stocks = $stocks->map(function ($stock) use ($stock_positions, $interval, $kd_period, $rsi_period, $latest_trade_date) {
 
             $latest_daily_record = optional($stock->latest_daily_record);
 
@@ -85,6 +92,7 @@ class DashboardController
 
             return collect([
                 'id' => $stock->id,
+                'is_update' => ($latest_trade_date == $latest_daily_record->date) ? true :false,
                 'symbol' => $stock->symbol,
                 'name' => $stock->name,
                 'type' => $stock->type,

@@ -10,7 +10,6 @@ namespace App\Services;
 
 
 use App\ThirdPartyAPI\YahooFinanceAPI;
-use Carbon\Carbon;
 
 class YahooFinanceService
 {
@@ -19,6 +18,17 @@ class YahooFinanceService
     public function __construct(YahooFinanceAPI $yahooFinance)
     {
         $this->yahooFinance = $yahooFinance;
+    }
+
+    public function getLatestTradeDate()
+    {
+        $response = $this->yahooFinance->getSingleQuote('SPY');
+
+        $result = json_decode(json_encode($response), true);
+
+        $date = explode(" ", $result['regularMarketTime']['date']);
+
+        return $date[0];
     }
 
     public function getQuoteBySymbol($symbol)

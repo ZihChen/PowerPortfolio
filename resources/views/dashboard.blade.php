@@ -2,12 +2,6 @@
 @include('layouts.bootstrap_cdn')
 
 <div class="main">
-    <form autocomplete="off" action="{{"/stocks"}}" method="post">
-        <div class="autocomplete" style="width:250px;">
-            <input id="myInput" type="text" name="symbol" placeholder="代號">
-        </div>
-        <input type="submit" name="click">
-    </form>
     <div class="sort-btn">
         <input type="submit" class="btn btn-primary mb-3" value="確認" onclick="sort()">
     </div>
@@ -24,11 +18,17 @@
             <option value="change_percent">漲跌幅</option>
         </select>
     </div>
+    <form autocomplete="off" action="{{"/stocks"}}" method="post">
+        <div class="autocomplete" style="width:250px;">
+            <input id="myInput" type="text" name="symbol" placeholder="代號">
+        </div>
+        <input type="submit" name="click">
+    </form>
     <div class="table-group">
         <table class="table table-hover">
             <thead>
             <tr>
-                <th scope="col">#</th>
+                <th scope="col">##</th>
                 <th scope="col">代號</th>
                 <th scope="col">收盤價</th>
                 <th scope="col">股價漲跌幅</th>
@@ -47,7 +47,13 @@
             <tbody>
             @foreach($stocks as $key => $stock)
                 <tr>
-                    <th scope="row">{{$key + 1}}</th>
+                    <th scope="row">
+                        @if ($stock['is_update'] == true)
+                            <i class="fas fa-check" style="color: yellowgreen"></i>
+                        @else
+                            <i class="fas fa-times" style="color: #ff413c"></i>
+                        @endif
+                    </th>
                         <td>@if ($stock['type'] == 'Equity')
                             <i class="fas fa-cube"></i>
                             @else
