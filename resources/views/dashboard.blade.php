@@ -54,18 +54,22 @@
                             <i class="fas fa-times" style="color: #ff413c"></i>
                         @endif
                     </th>
-                        <td>@if ($stock['type'] == 'Equity')
-                            <i class="fas fa-cube"></i>
-                            @else
-                            <i class="fas fa-cubes"></i>
-                            @endif
-                            <strong>
-                                {{$stock['symbol']}}
-                            </strong><br>
-                            {{$stock['name']}}
-                        </td>
+                    <td>@if ($stock['type'] == 'Equity')
+                        <i class="fas fa-cube"></i>
+                        @else
+                        <i class="fas fa-cubes"></i>
+                        @endif
+                        <strong>
+                            {{$stock['symbol']}}
+                        </strong><br>
+                        {{$stock['name']}}
+                    </td>
                     <td>{{$stock['close_price']}}</td>
-                    <td>{{$stock['change_percent']}}%</td>
+                        @if($stock['change_percent'] >= 0)
+                        <td style="color: yellowgreen">{{$stock['change_percent']}}%</td>
+                        @else
+                        <td style="color: #ff413c">{{$stock['change_percent']}}%</td>
+                        @endif
                     <td>{{$stock['stochastic_k']}}</td>
                     <td>{{$stock['stochastic_d']}}</td>
                     <td>{{$stock['rsi']}}</td>
@@ -73,7 +77,7 @@
                     <td>{{$stock['units']}}</td>
                     <td>${{$stock['avg_open']}}</td>
                     <td>${{$stock['invested']}}</td>
-                    <td>${{$stock['profit_loss_percent']}}</td>
+                    <td>{{$stock['profit_loss_percent']}}%</td>
                     <td>${{$stock['profit_loss_value']}}</td>
                     <td>
                         <a href="/stocks/{{$stock['id']}}/delete" data-method="delete">
@@ -84,6 +88,16 @@
             @endforeach
             </tbody>
         </table>
+    </div>
+    <div class="pagination">
+        <a href="#">&laquo;</a>
+        <a href="#">1</a>
+        <a class="active" href="#">2</a>
+        <a href="#">3</a>
+        <a href="#">4</a>
+        <a href="#">5</a>
+        <a href="#">6</a>
+        <a href="#">&raquo;</a>
     </div>
 </div>
 
@@ -159,6 +173,24 @@
     .autocomplete-items div:hover {
         background-color: #e9e9e9;
     }
+    .pagination {
+        display: inline-block;
+        float: right;
+    }
+
+    .pagination a {
+        color: black;
+        float: left;
+        padding: 8px 16px;
+        text-decoration: none;
+    }
+
+    .pagination a.active {
+        background-color: DodgerBlue;
+        color: white;
+    }
+
+    .pagination a:hover:not(.active) {background-color: #ddd;}
 </style>
 
 <script>
