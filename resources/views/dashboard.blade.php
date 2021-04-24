@@ -22,7 +22,7 @@
         <div class="autocomplete" style="width:250px;">
             <input id="myInput" type="text" name="symbol" placeholder="代號">
         </div>
-        <input type="submit" name="click">
+        <input style="color: white" type="submit" name="click">
     </form>
     <div class="table-group">
         <table class="table table-hover">
@@ -31,7 +31,7 @@
                 <th scope="col">##</th>
                 <th scope="col">代號</th>
                 <th scope="col">收盤價</th>
-                <th scope="col">股價漲跌幅</th>
+                <th scope="col">漲跌幅</th>
                 <th scope="col">K值</th>
                 <th scope="col">D值</th>
                 <th scope="col">RSI</th>
@@ -80,7 +80,7 @@
                     <td>{{$stock['profit_loss_percent']}}%</td>
                     <td>${{$stock['profit_loss_value']}}</td>
                     <td>
-                        <a href="/stocks/{{$stock['id']}}/delete" data-method="delete">
+                        <a style="color: lightskyblue" href="/stocks/{{$stock['id']}}/delete" data-method="delete">
                             <i class="far fa-trash-alt"></i>
                         </a>
                     </td>
@@ -152,8 +152,9 @@
         width: 100%;
     }
     input[type=submit] {
-        background-color: DodgerBlue;
-        color: #fff;
+        background-color: lightskyblue;
+        border-color: lightskyblue;
+        /*color: #fff;*/
     }
     .autocomplete-items {
         position: absolute;
@@ -187,7 +188,7 @@
     }
 
     .pagination a.active {
-        background-color: DodgerBlue;
+        background-color: lightskyblue;
         color: white;
     }
 
