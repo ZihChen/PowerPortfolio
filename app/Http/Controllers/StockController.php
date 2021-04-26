@@ -49,6 +49,9 @@ class StockController extends Controller
 
         $this->userStockService->detachStockByUser($user, $stock->id);
 
-        return redirect('/dashboard');
+        return response()->json([
+            'msg' => 'success',
+            'status' => 200
+        ]);
     }
 }

@@ -80,7 +80,7 @@
                     <td>{{$stock['profit_loss_percent']}}%</td>
                     <td>${{$stock['profit_loss_value']}}</td>
                     <td>
-                        <a style="color: lightskyblue" href="/stocks/{{$stock['id']}}/delete" data-method="delete">
+                        <a style="color: lightskyblue" onclick="remove({{$stock['id']}})">
                             <i class="far fa-trash-alt"></i>
                         </a>
                     </td>
@@ -196,6 +196,27 @@
 </style>
 
 <script>
+
+    function remove(id) {
+
+        fetch('stocks/'+ id + '/delete', {
+            method: 'delete'
+        })
+            .then(function(response) {
+
+                return response.json();
+
+            })
+            .then(function(myJson) {
+
+                this.data = myJson
+
+                return this.data
+            });
+
+        parent.document.location.reload();
+    }
+
     function sort() {
 
         var o = document.getElementById("option-order");

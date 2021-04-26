@@ -38,7 +38,7 @@ Route::group(['middleware' => 'auth'], function () {
 
         Route::post('/', [StockController::class, 'postUserStockRelation']);
 
-        Route::get('/{stock_id}/delete', [StockController::class, 'removeUserStockRelation']);
+        Route::delete('/{stock_id}/delete', [StockController::class, 'removeUserStockRelation']);
     });
 
     Route::get('user', [AuthController::class, 'getUser']);
