@@ -60,7 +60,7 @@
                         <i class="fas fa-cubes"></i>
                         @endif
                         <strong>
-                            {{$stock['symbol']}}
+                            <a href="/stocks/{{$stock['id']}}/overview" style="text-decoration: none; color: lightseagreen">{{$stock['symbol']}}</a>
                         </strong><br>
                         {{$stock['name']}}
                     </td>

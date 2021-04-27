@@ -42,6 +42,6 @@ class Handler extends ExceptionHandler
 
     protected function unauthenticated($request, AuthenticationException $exception)
     {
-        return response(['msg' => 'Authorization failed'], 401);
+        return redirect('login_page');
     }
 }
