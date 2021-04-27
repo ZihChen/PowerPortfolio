@@ -82,11 +82,11 @@ class DashboardController
                 ->take(1)
                 ->first();
 
-            $rsi_record = $stock->rsi_records()->orderBy('date', 'desc')
+            $rsi_records = $stock->rsi_records()->orderBy('date', 'desc')
                 ->where('interval', $interval)
                 ->where('time_period', $rsi_period)
-                ->take(1)
-                ->first();
+                ->take(10)
+                ->get();
 
             $stock_position = $stock_positions->where('stock_id', $stock->id)->first();
 
@@ -120,7 +120,7 @@ class DashboardController
                 'change_percent' => round($latest_daily_record->change_percent, 2),
                 'stochastic_k' => round(optional($kd_record)->stochastic_k, 4),
                 'stochastic_d' => round(optional($kd_record)->stochastic_d, 4),
-                'rsi' => round(optional($rsi_record)->rsi, 4),
+                'rsi_records' => $rsi_records->pluck('rsi', 'date'),
                 'date' => $latest_daily_record->date,
                 'units' => $units,
                 'avg_open' => empty($stock_position) ? 0.0 : $stock_position->avg_open,

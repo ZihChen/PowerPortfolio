@@ -28,7 +28,9 @@
         <table class="table table-hover">
             <thead>
             <tr>
-                <th scope="col">##</th>
+                <th scope="col">
+                    <i class="fas fa-sync-alt"></i>
+                </th>
                 <th scope="col">代號</th>
                 <th scope="col">收盤價</th>
                 <th scope="col">漲跌幅</th>
@@ -72,7 +74,28 @@
                         @endif
                     <td>{{$stock['stochastic_k']}}</td>
                     <td>{{$stock['stochastic_d']}}</td>
-                    <td>{{$stock['rsi']}}</td>
+                    <td>
+                    @foreach($stock['rsi_records'] as $record)
+
+                        @if ($record >= 70 && $record <= 100)
+                            <i class="fas fa-square" style="color: #14B45A"></i>
+                        @elseif($record < 70 && $record >= 60)
+                            <i class="fas fa-square" style="color: #64D76E"></i>
+                        @elseif($record < 60 && $record >= 55)
+                            <i class="fas fa-square" style="color: #AFFF8C"></i>
+                        @elseif($record < 55 && $record >= 50)
+                            <i class="fas fa-square" style="color: #D2FFBE"></i>
+                        @elseif($record < 50 && $record >= 45)
+                            <i class="fas fa-square" style="color: #FFDCDC"></i>
+                        @elseif($record < 45 && $record >= 40)
+                            <i class="fas fa-square" style="color: #FFBEBE"></i>
+                        @elseif($record < 40 && $record >= 30)
+                            <i class="fas fa-square" style="color: #FF9191"></i>
+                        @else
+                            <i class="fas fa-square" style="color: #FF6E6E"></i>
+                        @endif
+                    @endforeach
+                    </td>
                     <td>{{$stock['target_position']}}%</td>
                     <td>{{$stock['units']}}</td>
                     <td>${{$stock['avg_open']}}</td>
