@@ -76,17 +76,23 @@ class DashboardController
 
             $latest_daily_record = optional($stock->latest_daily_record);
 
-            $kd_record = $stock->kd_records()->orderBy('date', 'desc')
+            $kd_records = $stock->kd_records()->orderBy('date', 'desc')
                 ->where('interval', $interval)
                 ->where('fastk_period', $kd_period)
-                ->take(1)
-                ->first();
+                ->select('stochastic_k', 'stochastic_d', 'date')
+                ->take(10)
+                ->get()
+                ->reverse();
+
+            $latest_kd = $kd_records->last();
 
             $rsi_records = $stock->rsi_records()->orderBy('date', 'desc')
                 ->where('interval', $interval)
                 ->where('time_period', $rsi_period)
                 ->take(10)
-                ->get();
+                ->get()
+                ->reverse()
+                ->pluck('rsi', 'date');
 
             $stock_position = $stock_positions->where('stock_id', $stock->id)->first();
 
@@ -112,15 +118,20 @@ class DashboardController
 
             return collect([
                 'id' => $stock->id,
-                'is_update' => ($latest_trade_date == $latest_daily_record->date) ? true :false,
+                'is_update' => ($latest_trade_date == $latest_daily_record->date) ? true : false,
                 'symbol' => $stock->symbol,
                 'name' => $stock->name,
                 'type' => $stock->type,
                 'close_price' => $close_price,
                 'change_percent' => round($latest_daily_record->change_percent, 2),
-                'stochastic_k' => round(optional($kd_record)->stochastic_k, 4),
-                'stochastic_d' => round(optional($kd_record)->stochastic_d, 4),
-                'rsi_records' => $rsi_records->pluck('rsi', 'date'),
+                'stochastic_k' => round(optional($latest_kd)->stochastic_k, 4),
+                'stochastic_d' => round(optional($latest_kd)->stochastic_d, 4),
+                'kd_diffs' => $kd_records->map(function ($kd_record) {
+
+                    return $kd_record['stochastic_k'] / $kd_record['stochastic_d'];
+                }),
+                'rsi_records' => $rsi_records,
+                'latest_rsi' => $rsi_records->last(),
                 'date' => $latest_daily_record->date,
                 'units' => $units,
                 'avg_open' => empty($stock_position) ? 0.0 : $stock_position->avg_open,

@@ -33,9 +33,7 @@
                 </th>
                 <th scope="col">代號</th>
                 <th scope="col">收盤價</th>
-                <th scope="col">漲跌幅</th>
-                <th scope="col">K值</th>
-                <th scope="col">D值</th>
+                <th scope="col">KD</th>
                 <th scope="col">RSI</th>
                 <th scope="col">目標倉位</th>
                 <th scope="col">投資單位</th>
@@ -66,35 +64,67 @@
                         </strong><br>
                         {{$stock['name']}}
                     </td>
-                    <td>{{$stock['close_price']}}</td>
-                        @if($stock['change_percent'] >= 0)
-                        <td style="color: yellowgreen">{{$stock['change_percent']}}%</td>
-                        @else
-                        <td style="color: #ff413c">{{$stock['change_percent']}}%</td>
-                        @endif
-                    <td>{{$stock['stochastic_k']}}</td>
-                    <td>{{$stock['stochastic_d']}}</td>
+                    <td>{{$stock['close_price']}}<br>
+                    @if($stock['change_percent'] >= 0)
+                        <a style="color: yellowgreen; font-size: smaller">{{$stock['change_percent']}}%</a>
+                    @else
+                        <a style="color: #ff413c; font-size: smaller">{{$stock['change_percent']}}%</a>
+                    @endif
+                    </td>
                     <td>
-                    @foreach($stock['rsi_records'] as $record)
+                        <div style="position: relative; float:left ; top: 8px">
+                            @foreach($stock['kd_diffs'] as $diff_value)
 
-                        @if ($record >= 70 && $record <= 100)
-                            <i class="fas fa-square" style="color: #14B45A"></i>
-                        @elseif($record < 70 && $record >= 60)
-                            <i class="fas fa-square" style="color: #64D76E"></i>
-                        @elseif($record < 60 && $record >= 55)
-                            <i class="fas fa-square" style="color: #AFFF8C"></i>
-                        @elseif($record < 55 && $record >= 50)
-                            <i class="fas fa-square" style="color: #D2FFBE"></i>
-                        @elseif($record < 50 && $record >= 45)
-                            <i class="fas fa-square" style="color: #FFDCDC"></i>
-                        @elseif($record < 45 && $record >= 40)
-                            <i class="fas fa-square" style="color: #FFBEBE"></i>
-                        @elseif($record < 40 && $record >= 30)
-                            <i class="fas fa-square" style="color: #FF9191"></i>
-                        @else
-                            <i class="fas fa-square" style="color: #FF6E6E"></i>
-                        @endif
-                    @endforeach
+                                @if ($diff_value >= 1.3)
+                                    <i class="fas fa-square" style="color: #14B45A"></i>
+                                @elseif($diff_value < 1.3 && $diff_value >= 1.15)
+                                    <i class="fas fa-square" style="color: #64D76E"></i>
+                                @elseif($diff_value < 1.15 && $diff_value >= 1.05)
+                                    <i class="fas fa-square" style="color: #AFFF8C"></i>
+                                @elseif($diff_value < 1.05 && $diff_value >= 1)
+                                    <i class="fas fa-square" style="color: #D2FFBE"></i>
+                                @elseif($diff_value < 1 && $diff_value >= 0.95)
+                                    <i class="fas fa-square" style="color: #FFDCDC"></i>
+                                @elseif($diff_value < 0.95 && $diff_value >= 0.85)
+                                    <i class="fas fa-square" style="color: #FFBEBE"></i>
+                                @elseif($diff_value < 0.85 && $diff_value >= 0.7)
+                                    <i class="fas fa-square" style="color: #FF9191"></i>
+                                @else
+                                    <i class="fas fa-square" style="color: #FF6E6E"></i>
+                                @endif
+                            @endforeach
+                        </div>
+                        <div style="position: relative; float:left ; top: 3px ; left: 5px">
+                            <a style="font-size: smaller">{{$stock['stochastic_k']}}</a><br>
+                            <a style="font-size: smaller">{{$stock['stochastic_d']}}</a>
+                        </div>
+                    </td>
+                    <td>
+                        <div style="position: relative; float:left ; top: 8px">
+                            @foreach($stock['rsi_records'] as $record)
+
+                                @if ($record >= 70 && $record <= 100)
+                                    <i class="fas fa-square" style="color: #14B45A"></i>
+                                @elseif($record < 70 && $record >= 60)
+                                    <i class="fas fa-square" style="color: #64D76E"></i>
+                                @elseif($record < 60 && $record >= 55)
+                                    <i class="fas fa-square" style="color: #AFFF8C"></i>
+                                @elseif($record < 55 && $record >= 50)
+                                    <i class="fas fa-square" style="color: #D2FFBE"></i>
+                                @elseif($record < 50 && $record >= 45)
+                                    <i class="fas fa-square" style="color: #FFDCDC"></i>
+                                @elseif($record < 45 && $record >= 40)
+                                    <i class="fas fa-square" style="color: #FFBEBE"></i>
+                                @elseif($record < 40 && $record >= 30)
+                                    <i class="fas fa-square" style="color: #FF9191"></i>
+                                @else
+                                    <i class="fas fa-square" style="color: #FF6E6E"></i>
+                                @endif
+                            @endforeach
+                        </div>
+                        <div style="position: relative; float:left ; top: 8px ; left: 5px">
+                            <a style="font-size: smaller">{{$stock['latest_rsi']}}</a>
+                        </div>
                     </td>
                     <td>{{$stock['target_position']}}%</td>
                     <td>{{$stock['units']}}</td>
