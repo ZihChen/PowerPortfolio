@@ -35,9 +35,7 @@
                 <th scope="col">收盤價</th>
                 <th scope="col">KD</th>
                 <th scope="col">RSI</th>
-                <th scope="col">目標倉位</th>
-                <th scope="col">投資單位</th>
-                <th scope="col">平均開倉價</th>
+                <th scope="col">投資紀錄</th>
                 <th scope="col">投資總額</th>
                 <th scope="col">損益百分比</th>
                 <th scope="col">損益總額</th>
@@ -100,7 +98,7 @@
                         </div>
                     </td>
                     <td>
-                        <div style="position: relative; float:left ; top: 8px">
+                        <div class="rsi-column-left">
                             @foreach($stock['rsi_records'] as $record)
 
                                 @if ($record >= 70 && $record <= 100)
@@ -122,13 +120,29 @@
                                 @endif
                             @endforeach
                         </div>
-                        <div style="position: relative; float:left ; top: 8px ; left: 5px">
+                        <div class="rsi-column-right">
                             <a style="font-size: smaller">{{$stock['latest_rsi']}}</a>
                         </div>
                     </td>
-                    <td>{{$stock['target_position']}}%</td>
-                    <td>{{$stock['units']}}</td>
-                    <td>${{$stock['avg_open']}}</td>
+                    <td>
+                        <button type="button" class="collapsible" style="width: 85px; text-align: center">
+                            <i class="fas fa-feather-alt"></i>
+                        </button>
+                        <div class="content">
+                            <p style="font-size: smaller">
+                                目標倉位<a style="font-size: x-small">(%)</a><br>
+                                <input class = "position-input" type="text" id="fname" name="fname" style="width: 79px">
+                            </p>
+                            <p style="font-size: smaller">
+                                平均開倉價<a style="font-size: x-small">($)</a><br>
+                                <input class = "position-input" type="text" id="fname" name="fname" style="width: 79px">
+                            </p>
+                            <p style="font-size: smaller">
+                                投資單位<a style="font-size: x-small">(股)</a><br>
+                                <input class = "position-input" type="text" id="fname" name="fname" style="width: 79px">
+                            </p>
+                        </div>
+                    </td>
                     <td>${{$stock['invested']}}</td>
                     <td>{{$stock['profit_loss_percent']}}%</td>
                     <td>${{$stock['profit_loss_value']}}</td>
@@ -156,6 +170,47 @@
 </div>
 
 <style>
+    .position-input {
+        text-align: center;
+        padding: 3px;
+        font-size: small;
+        margin-left: 3px;
+        margin-right: 3px;
+    }
+    .collapsible {
+        background-color: #bee5eb;
+        color: white;
+        cursor: pointer;
+        padding: 5px;
+        width: 100%;
+        border: none;
+        text-align: left;
+        outline: none;
+        font-size: 15px;
+    }
+
+    .active, .collapsible:hover {
+        background-color: #bee5eb;
+    }
+
+    .content {
+        width: 85px;
+        margin-bottom: 0;
+        display: none;
+        overflow: hidden;
+        background-color: white;
+    }
+    .rsi-column-left {
+        position: relative;
+        float:left;
+        top: 8px;
+    }
+    .rsi-column-right {
+        position: relative;
+        float:left;
+        top: 8px;
+        left: 5px;
+    }
     .main {
         margin-top: 20px;
         margin-left: 20px;
@@ -205,8 +260,8 @@
         width: 100%;
     }
     input[type=submit] {
-        background-color: lightskyblue;
-        border-color: lightskyblue;
+        background-color: #bee5eb;
+        border-color: #bee5eb;
         /*color: #fff;*/
     }
     .autocomplete-items {
@@ -241,7 +296,7 @@
     }
 
     .pagination a.active {
-        background-color: lightskyblue;
+        background-color: #bee5eb;
         color: white;
     }
 
@@ -378,4 +433,21 @@
     }
 
     autocomplete(document.getElementById("myInput"));
+</script>
+
+<script>
+    var coll = document.getElementsByClassName("collapsible");
+    var i;
+
+    for (i = 0; i < coll.length; i++) {
+        coll[i].addEventListener("click", function() {
+            this.classList.toggle("active");
+            var content = this.nextElementSibling;
+            if (content.style.display === "block") {
+                content.style.display = "none";
+            } else {
+                content.style.display = "block";
+            }
+        });
+    }
 </script>

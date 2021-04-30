@@ -48,7 +48,7 @@ class DashboardController
 
         $current_page = $request->get('page', 1);
 
-        $limit = $request->get('limit', 10);
+        $limit = $request->get('limit', 12);
 
         $select_option_column = $request->get('column', 'symbol');
 
