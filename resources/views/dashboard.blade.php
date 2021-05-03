@@ -37,7 +37,6 @@
                 <th scope="col">RSI</th>
                 <th scope="col">投資紀錄</th>
                 <th scope="col">投資總額</th>
-                <th scope="col">損益百分比</th>
                 <th scope="col">損益總額</th>
                 <th scope="col"></th>
             </tr>
@@ -144,8 +143,13 @@
                         </div>
                     </td>
                     <td>${{$stock['invested']}}</td>
-                    <td>{{$stock['profit_loss_percent']}}%</td>
-                    <td>${{$stock['profit_loss_value']}}</td>
+                    <td>${{$stock['profit_loss_value']}}<br>
+                        @if($stock['profit_loss_percent'] >= 0)
+                            <a style="color: yellowgreen; font-size: smaller">{{$stock['profit_loss_percent']}}%</a>
+                        @else
+                            <a style="color: #ff413c; font-size: smaller">{{$stock['profit_loss_percent']}}%</a>
+                        @endif
+                    </td>
                     <td>
                         <a style="color: lightskyblue" onclick="remove({{$stock['id']}})">
                             <i class="far fa-trash-alt"></i>
