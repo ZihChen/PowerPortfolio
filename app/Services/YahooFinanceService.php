@@ -10,6 +10,7 @@ namespace App\Services;
 
 
 use App\ThirdPartyAPI\YahooFinanceAPI;
+use Carbon\Carbon;
 
 class YahooFinanceService
 {
@@ -45,8 +46,35 @@ class YahooFinanceService
         ];
     }
 
-    public function getQuotesBySymbol($symbols)
+    public function getQuotesBySymbol($stocks)
     {
+        $now = Carbon::now();
 
+        $symbols = $stocks->pluck('symbol')->toArray();
+
+        $response = $this->yahooFinance->getMultiQuote($symbols);
+
+        $result = json_decode(json_encode($response), true);
+
+        $data = [];
+
+        foreach ($stocks as $key => $stock) {
+
+            $date = explode(" ", $result[$key]['regularMarketTime']['date']);
+
+            $data[$stock->symbol] = [
+                'stock_id' => $stock->id,
+                'date' => $date[0],
+                'close_price' => $result[$key]['regularMarketPrice'],
+                'high_price' => $result[$key]['regularMarketDayHigh'],
+                'low_price' => $result[$key]['regularMarketDayLow'],
+                'change_percent' => $result[$key]['regularMarketChangePercent'],
+                'created_at' => $now,
+                'updated_at' => $now,
+            ];
+
+        }
+
+        return $data;
     }
 }

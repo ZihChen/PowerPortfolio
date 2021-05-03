@@ -97,6 +97,8 @@ class StochasticOscillatorService
     {
         $daily_records = $stock->daily_records;
 
+        $latest_daily_record = $daily_records->first();
+
         $highest_price = $daily_records->max('high_price');
 
         if ($latest_quote['high_price'] > $highest_price) $highest_price = $latest_quote['high_price'];
@@ -105,7 +107,30 @@ class StochasticOscillatorService
 
         if ($latest_quote['low_price'] < $lowest_price) $lowest_price = $latest_quote['low_price'];
 
-        $rsv = ($latest_quote['close_price'] - $lowest_price) / ($highest_price - $lowest_price);
+        $rsv = ($latest_daily_record->close - $lowest_price) / ($highest_price - $lowest_price);
+
+        $stochastic_k = ($stock->kd_records->pluck('rsv')->push($rsv)->avg() * 100);
+
+        $stochastic_d = $stock->kd_records->pluck('stochastic_k')->push($stochastic_k)->avg();
+
+        return [
+            'rsv' => $rsv,
+            'stochastic_k' => $stochastic_k,
+            'stochastic_d' => $stochastic_d,
+        ];
+    }
+
+    public function calculateStochasticOscillatoryStock($stock)
+    {
+        $daily_records = $stock->daily_records;
+
+        $latest_daily_record = $daily_records->first();
+
+        $highest_price = $daily_records->max('high_price');
+
+        $lowest_price = $daily_records->min('low_price');
+
+        $rsv = ($latest_daily_record->close_price - $lowest_price) / ($highest_price - $lowest_price);
 
         $stochastic_k = ($stock->kd_records->pluck('rsv')->push($rsv)->avg() * 100);
 

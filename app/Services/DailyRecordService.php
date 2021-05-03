@@ -34,6 +34,12 @@ class DailyRecordService
         ]);
     }
 
+    /**
+     * 新增一筆股票的多筆股價紀錄
+     *
+     * @param $stock
+     * @param $daily_records
+     */
     public function insertDailyRecordsByStock($stock, $daily_records)
     {
         $now = Carbon::now();
@@ -63,5 +69,15 @@ class DailyRecordService
         }
 
         $this->dailyRecordModel->insert(array_reverse($insert_fields));
+    }
+
+    /**
+     * 新增多筆股票的最新一筆股價紀錄
+     *
+     * @param array $insert_fields
+     */
+    public function insertDailyRecordsByStocks($insert_fields = [])
+    {
+        $this->dailyRecordModel->insert($insert_fields);
     }
 }

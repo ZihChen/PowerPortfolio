@@ -227,6 +227,37 @@ class RelativeStrengthIndexService
         ];
     }
 
+    public function calculateRsiByStock($stock, $rsi_period)
+    {
+        $latest_close_price = $stock->daily_records->first()->close_price;
+
+        $previous_close_price = $stock->daily_records->get(1)->close_price;
+
+        $change = $latest_close_price - $previous_close_price;
+
+        list($price_up, $price_fall) = $this->getClosePriceChange($change);
+
+        $rsi_record = $stock->rsi_records->first();
+
+        $previous_avg_gain = $rsi_record->avg_gain;
+
+        $previous_avg_loss = $rsi_record->avg_loss;
+
+        $avg_gain = ($previous_avg_gain * (($rsi_period - 1) / $rsi_period)) + ($price_up * (1 / $rsi_period));
+
+        $avg_loss = ($previous_avg_loss * (($rsi_period - 1) / $rsi_period)) + ($price_fall * (1 / $rsi_period));
+
+        $rs = abs($avg_gain / $avg_loss);
+
+        $rsi = 100 - (100 / (1 + $rs));
+
+        return [
+            'rsi' => $rsi,
+            'avg_gain' => $avg_gain,
+            'avg_loss' => $avg_loss,
+        ];
+    }
+
     /**
      * @param Stock $stock => 股票
      * @param DailyStockRecord $daily_record => 當日收盤股價
