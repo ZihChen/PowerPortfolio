@@ -6,7 +6,7 @@
 ![Lines of code](https://img.shields.io/tokei/lines/github/ZihChen/PowerPortfolio)
 [![contributions welcome](https://img.shields.io/badge/contributions-welcome-brightgreen.svg?style=flat)](https://github.com/navendu-pottekkat/virtual-drums/issues)
 
-##什麼是Power Portfolio?
+## 什麼是Power Portfolio?
 
 為了節省每天看盤的時間所設計的一款結合股價、技術指標、基本面資訊、個人資產盈虧的美股長期績效投資工具，省去每天要輸入代號及參數進看盤軟體等麻煩操作，每天只需要短短的時間便可以瀏覽所有股票的近期走勢
 

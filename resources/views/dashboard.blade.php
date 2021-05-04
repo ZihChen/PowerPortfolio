@@ -1,7 +1,8 @@
 
 @include('layouts.bootstrap_cdn')
 
-<div class="main">
+<body style="background-color: #F2F2F2"></body>
+<div class="main" style="">
     <div class="sort-btn">
         <input type="submit" class="btn btn-primary mb-3" value="確認" onclick="sort()">
     </div>
@@ -57,7 +58,7 @@
                         <i class="fas fa-cubes"></i>
                         @endif
                         <strong>
-                            <a href="/stocks/{{$stock['id']}}/overview" style="text-decoration: none; color: lightseagreen">{{$stock['symbol']}}</a>
+                            <a href="/stocks/{{$stock['id']}}/overview" style="text-decoration: none; color: #00352C">{{$stock['symbol']}}</a>
                         </strong><br>
                         {{$stock['name']}}
                     </td>
@@ -151,7 +152,7 @@
                         @endif
                     </td>
                     <td>
-                        <a style="color: lightskyblue" onclick="remove({{$stock['id']}})">
+                        <a style="color: #60B390" onclick="remove({{$stock['id']}})">
                             <i class="far fa-trash-alt"></i>
                         </a>
                     </td>
@@ -182,7 +183,7 @@
         margin-right: 3px;
     }
     .collapsible {
-        background-color: #bee5eb;
+        background-color: #60B390;
         color: white;
         cursor: pointer;
         padding: 5px;
@@ -194,7 +195,7 @@
     }
 
     .active, .collapsible:hover {
-        background-color: #bee5eb;
+        background-color: #60B390;
     }
 
     .content {
@@ -255,17 +256,17 @@
     }
     input {
         border: 1px solid transparent;
-        background-color: #f1f1f1;
+        background-color: white;
         padding: 10px;
         font-size: 16px;
     }
     input[type=text] {
-        background-color: #f1f1f1;
+        background-color: white;
         width: 100%;
     }
     input[type=submit] {
-        background-color: #bee5eb;
-        border-color: #bee5eb;
+        background-color: #60B390;
+        border-color: #60B390;
         /*color: #fff;*/
     }
     .autocomplete-items {
@@ -300,7 +301,7 @@
     }
 
     .pagination a.active {
-        background-color: #bee5eb;
+        background-color: #60B390;
         color: white;
     }
 
