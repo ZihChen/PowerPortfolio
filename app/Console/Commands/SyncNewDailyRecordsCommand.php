@@ -11,6 +11,7 @@ use App\Services\StochasticOscillatorService;
 use App\Services\StockService;
 use App\Services\YahooFinanceService;
 use Illuminate\Console\Command;
+use Illuminate\Support\Facades\DB;
 
 class SyncNewDailyRecordsCommand extends Command
 {
@@ -47,7 +48,7 @@ class SyncNewDailyRecordsCommand extends Command
      *
      * @var string
      */
-    protected $description = 'Command description';
+    protected $description = '[v2更新每日股價資訊]:php artisan sync:new_record';
 
     /**
      * Create a new command instance.
@@ -80,94 +81,116 @@ class SyncNewDailyRecordsCommand extends Command
 
         $latest_trading_day = $res['date'];
 
-        Stock::with(['latest_daily_record' => function ($query) use ($latest_trading_day) {
+        try {
 
-            $query->where('date', $latest_trading_day);
-        }])->chunk(50, function ($batch_stock) use ($latest_trading_day) {
+            Stock::with(['latest_daily_record' => function ($query) use ($latest_trading_day) {
 
-            $this->info("\n" . 'Start to migrate batch stock latest daily record...');
+                $query->where('date', $latest_trading_day);
+            }])->chunk(20, function ($batch_stock) use ($latest_trading_day) {
 
-            $batch_stock = $batch_stock->filter(function ($stock) {
+                $this->info("\n" . 'Start to migrate batch stock latest daily record...');
 
-                $is_update = empty($stock->latest_daily_record);
+                $batch_stock = $batch_stock->filter(function ($stock) {
 
-                if (!$is_update) {
+                    $is_update = empty($stock->latest_daily_record);
 
-                    $this->info("\n" . $stock->symbol . ' ' . 'has been updated.');
-                }
+                    if (!$is_update) {
 
-                return $is_update;
-            });
-
-            $data = $this->yahooFinanceService->getQuotesBySymbol($batch_stock);
-
-            $this->dailyRecordService->insertDailyRecordsByStocks($data);
-
-            $batch_stock->each(function ($stock) use ($latest_trading_day) {
-
-                $this->info("\n" . 'Start migrate daily indicator:' . $stock->symbol);
-
-                $stock->load([
-                    'daily_records' => function ($query) {
-                        $query->orderBy('date', 'desc')
-                            ->take(9);
-                    },
-                    'kd_records' => function ($query) {
-                        $query->orderBy('date', 'desc')
-                            ->whereIn('interval', [self::INTERVAL])
-                            ->where('fastk_period', [self::KD_PERIOD])
-                            ->take(2);
-                    },
-                    'rsi_records' => function ($query) {
-                        $query->orderBy('date', 'desc')
-                            ->whereIn('interval', [self::INTERVAL])
-                            ->whereIn('time_period', [self::RSI_PERIOD])
-                            ->take(1);
-                    }]);
-
-                //計算當日KD
-                $this->info("\n" . 'Calculate KD...');
-
-                $kd_indicator = $this->stochasticOscillatorService->calculateStochasticOscillatoryStock($stock);
-
-                //計算當日RSI
-                $this->info("\n" . 'Calculate RSI...');
-
-                $rsi_indicator = $this->relativeStrengthIndexService->calculateRsiByStock($stock, self::RSI_PERIOD);
-
-                $new_daily_record = $stock->daily_records->first();
-
-                //寫入KD Record
-                $this->stochasticOscillatorService->firstOrCreateKDRecordByStock($stock, $new_daily_record, $kd_indicator);
-
-                //寫入RSI Record
-                $this->relativeStrengthIndexService->firstOrCreateRSIRecordByStock($stock, $new_daily_record, $rsi_indicator);
-
-                $stock->quote_latest_refresh = $latest_trading_day;
-
-                if ($stock->type == 'Equity') {
-
-                    $this->info("\n" . 'Start to acquire latest fiscal overview...');
-                    $fiscal_info = $this->alphaAdvantageService->getStockOverview($stock->symbol);
-                    sleep(10);
-
-                    if ($stock->fiscal_latest_refresh != $fiscal_info['latest_refresh']) {
-
-                        $this->info("\n" . 'Migrate new fiscal overview...');
-
-                        $this->fiscalOverviewService->firstOrCreateFiscalOverview($stock, $fiscal_info);
-
-                        $stock->fiscal_latest_refresh = $fiscal_info['latest_refresh'];
+                        $this->info("\n" . $stock->symbol . ' ' . 'has been updated.');
                     }
 
+                    return $is_update;
+                });
+
+                $data = $this->yahooFinanceService->getQuotesBySymbol($batch_stock);
+
+                DB::beginTransaction();
+
+                $this->dailyRecordService->insertDailyRecordsByStocks($data);
+
+                foreach ($batch_stock as $stock) {
+
+                    $this->info("\n" . 'Start migrate daily indicator:' . $stock->symbol);
+
+                    sleep(5);
+
+                    $stock->load([
+                        'daily_records' => function ($query) {
+                            $query->orderBy('date', 'desc')
+                                ->take(9);
+                        },
+                        'kd_records' => function ($query) {
+                            $query->orderBy('date', 'desc')
+                                ->whereIn('interval', [self::INTERVAL])
+                                ->where('fastk_period', [self::KD_PERIOD])
+                                ->take(2);
+                        },
+                        'rsi_records' => function ($query) {
+                            $query->orderBy('date', 'desc')
+                                ->whereIn('interval', [self::INTERVAL])
+                                ->whereIn('time_period', [self::RSI_PERIOD])
+                                ->take(1);
+                        }]);
+
+                    //計算當日KD
+                    $this->info("\n" . 'Calculate KD...');
+
+                    $kd_indicator = $this->stochasticOscillatorService->calculateStochasticOscillatoryStock($stock);
+
+                    //計算當日RSI
+                    $this->info("\n" . 'Calculate RSI...');
+
+                    $rsi_indicator = $this->relativeStrengthIndexService->calculateRsiByStock($stock, self::RSI_PERIOD);
+
+                    $new_daily_record = $stock->daily_records->first();
+
+                    //寫入KD Record
+                    $this->stochasticOscillatorService->firstOrCreateKDRecordByStock($stock, $new_daily_record, $kd_indicator);
+
+                    //寫入RSI Record
+                    $this->relativeStrengthIndexService->firstOrCreateRSIRecordByStock($stock, $new_daily_record, $rsi_indicator);
+
+                    $stock->quote_latest_refresh = $latest_trading_day;
+
+                    if ($stock->type == 'Equity') {
+
+                        $this->info("\n" . 'Start to acquire latest fiscal overview...');
+
+                        $fiscal_info = $this->alphaAdvantageService->getStockOverview($stock->symbol);
+
+                        sleep(10);
+
+                        if ($stock->fiscal_latest_refresh != $fiscal_info['latest_refresh']) {
+
+                            $this->info("\n" . 'Migrate new fiscal overview...');
+
+                            $this->fiscalOverviewService->firstOrCreateFiscalOverview($stock, $fiscal_info);
+
+                            $stock->fiscal_latest_refresh = $fiscal_info['latest_refresh'];
+                        }
+
+                    }
+
+                    $stock->save();
+
+                    $this->info("\n" . $stock->symbol . ' ' . 'update completed.');
                 }
 
-                $stock->save();
+                DB::commit();
 
-                $this->info("\n" . $stock->symbol . ' ' . 'update completed.');
+                $this->info("\n" . 'Batch insert...');
             });
 
-        });
+        } catch (\Throwable $e) {
+
+            DB::rollBack();
+
+            $this->warn('Error Message:' . $e->getMessage());
+
+            $this->warn('trace:' . $e->getTraceAsString());
+
+            $this->warn('line:' . $e->getLine());
+        }
 
         $this->info("\n" . 'All sync completed!');
     }
