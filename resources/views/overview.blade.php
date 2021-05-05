@@ -1,5 +1,7 @@
 @include('layouts.bootstrap_cdn')
 
+<body style="background-color: #F2F2F2"></body>
+
 <div class="topnav">
     <a class="active" href="#home">Home</a>
     <a href="#news">News</a>
@@ -86,11 +88,11 @@
 
     .topnav a:hover {
         background-color: #ddd;
-        color: black;
+        color: #00352C;
     }
 
     .topnav a.active {
-        background-color: lightskyblue;
+        background-color: #60B390;
         color: white;
     }
     .table {
