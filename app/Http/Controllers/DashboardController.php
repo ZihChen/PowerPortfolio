@@ -13,6 +13,7 @@ use App\Services\StockService;
 use App\Models\UserStockPositionService;
 use App\Services\YahooFinanceService;
 use App\Services\UserStockService;
+use App\Services\UserPositionService;
 
 class DashboardController
 {
@@ -24,22 +25,27 @@ class DashboardController
 
     protected $yahooFinanceService;
 
+    protected $userPositionService;
+
     /**
      * DashboardController constructor.
      * @param StockService $stockService
      * @param UserStockService $userStockService
      * @param UserStockPositionService $userStockPositionService
      * @param YahooFinanceService $yahooFinanceService
+     * @param UserPositionService $userPositionService
      */
     public function __construct(StockService $stockService,
                                 UserStockService $userStockService,
                                 UserStockPositionService $userStockPositionService,
-                                YahooFinanceService $yahooFinanceService)
+                                YahooFinanceService $yahooFinanceService,
+                                UserPositionService $userPositionService)
     {
         $this->stockService = $stockService;
         $this->userStockService = $userStockService;
         $this->userStockPositionService = $userStockPositionService;
         $this->yahooFinanceService = $yahooFinanceService;
+        $this->userPositionService = $userPositionService;
     }
 
     public function getDashboard(Request $request)
@@ -109,21 +115,7 @@ class DashboardController
             //投資損益 = 市值價格 - 投資總額
             $profit_loss_value = $value_price - $invested;
 
-            $profit_loss_percent = null;
-
-            if ($profit_loss_value + $invested == 0) {
-
-                $profit_loss_percent = 0.0;
-            } else {
-
-                if ($invested == 0) {
-
-                    $profit_loss_percent = 0.0;
-                } else {
-
-                    $profit_loss_percent = round(($profit_loss_value / $invested) * 100, 2);
-                }
-            }
+            $profit_loss_percent = $this->userPositionService->calculateProfitLossPercent($profit_loss_value, $invested);
 
             return collect([
                 'id' => $stock->id,

@@ -30,4 +30,23 @@ class UserPositionService
             'avg_open' => isset($data['avg_open']) ? $data['avg_open'] : 0.0,
         ]);
     }
+
+    public function calculateProfitLossPercent($profit_loss_value, $invested)
+    {
+        if ($profit_loss_value + $invested == 0) {
+
+            $profit_loss_percent = 0.0;
+        } else {
+
+            if ($invested == 0) {
+
+                $profit_loss_percent = 0.0;
+            } else {
+
+                $profit_loss_percent = round(($profit_loss_value / $invested) * 100, 2);
+            }
+        }
+
+        return $profit_loss_percent;
+    }
 }
