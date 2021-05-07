@@ -4,6 +4,7 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\FiscalOverviewController;
 use App\Http\Controllers\StockController;
+use App\Http\Controllers\UserPositionController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -38,6 +39,8 @@ Route::group(['middleware' => 'auth'], function () {
         Route::get('search', [StockController::class, 'autocompleteSearch']);
 
         Route::post('/', [StockController::class, 'postUserStockRelation']);
+
+        Route::post('/{stock_id}/position', [UserPositionController::class, 'postUserPosition']);
 
         Route::get('/{stock_id}/overview', [FiscalOverviewController::class, 'getStockFiscalOverview']);
 

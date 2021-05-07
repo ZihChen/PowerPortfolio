@@ -11,5 +11,5 @@ class UserStockPosition extends Model
 
     protected $table = 'UserStockPositions';
 
-    protected $fillable = ['user_id', 'stock_id', 'invested', 'target_position', 'avg_open'];
+    protected $fillable = ['user_id', 'stock_id', 'units', 'avg_open', 'target_position'];
 }

@@ -131,15 +131,15 @@
                         <div class="content">
                             <p style="font-size: smaller">
                                 目標倉位<a style="font-size: x-small">(%)</a><br>
-                                <input class = "position-input" type="text" id="fname" name="fname" style="width: 79px">
+                                <input class = "position-input" type="text" id="target-position-{{$key}}" name="fname" style="width: 79px" value="{{$stock['target_position']}}" onclick="storeTargetPosition({{$key}}, {{$stock['id']}})">
                             </p>
                             <p style="font-size: smaller">
                                 平均開倉價<a style="font-size: x-small">($)</a><br>
-                                <input class = "position-input" type="text" id="fname" name="fname" style="width: 79px">
+                                <input class = "position-input" type="text" id="avg-open-{{$key}}" name="fname" style="width: 79px" value="{{$stock['avg_open']}}" onclick="storeAvgOpen({{$key}}, {{$stock['id']}})">
                             </p>
                             <p style="font-size: smaller">
                                 投資單位<a style="font-size: x-small">(股)</a><br>
-                                <input class = "position-input" type="text" id="fname" name="fname" style="width: 79px">
+                                <input class = "position-input" type="text" id="units-{{$key}}" name="fname" style="width: 79px" value="{{$stock['units']}}" onclick="storeUnits({{$key}}, {{$stock['id']}})">
                             </p>
                         </div>
                     </td>
@@ -310,22 +310,122 @@
 
 <script>
 
-    function remove(id) {
+    function storeTargetPosition(key, id) {
 
-        fetch('stocks/'+ id + '/delete', {
-            method: 'delete'
-        })
-            .then(function(response) {
+        const targetElement = document.getElementById('target-position-' + key)
+        const avgOpenElement = document.getElementById('avg-open-' + key)
+        const unitsElement = document.getElementById('units-' + key)
+
+        targetElement.addEventListener('focusout', function (event) {
+
+            target_position = targetElement.value
+            avg_open = avgOpenElement.value
+            units = unitsElement.value
+
+            let formData = new FormData();
+
+            formData.append('target_position', target_position);
+            formData.append('avg_open', avg_open);
+            formData.append('units', units);
+
+            fetch('stocks/' + id + '/position', {
+                body: formData,
+                method: 'post'
+            }).then(function (response) {
 
                 return response.json();
 
-            })
-            .then(function(myJson) {
+            }).then(function (myJson) {
 
                 this.data = myJson
 
                 return this.data
             });
+        });
+    }
+
+    function storeAvgOpen(key, id) {
+
+        const targetElement = document.getElementById('target-position-' + key)
+        const avgOpenElement = document.getElementById('avg-open-' + key)
+        const unitsElement = document.getElementById('units-' + key)
+
+        avgOpenElement.addEventListener('focusout', function (event) {
+
+            target_position = targetElement.value
+            avg_open = avgOpenElement.value
+            units = unitsElement.value
+
+            let formData = new FormData();
+
+            formData.append('target_position', target_position);
+            formData.append('avg_open', avg_open);
+            formData.append('units', units);
+
+            fetch('stocks/' + id + '/position', {
+                body: formData,
+                method: 'post'
+            }).then(function (response) {
+
+                return response.json();
+
+            }).then(function (myJson) {
+
+                this.data = myJson
+
+                return this.data
+            });
+        });
+    }
+
+    function storeUnits(key, id) {
+
+        const targetElement = document.getElementById('target-position-' + key)
+        const avgOpenElement = document.getElementById('avg-open-' + key)
+        const unitsElement = document.getElementById('units-' + key)
+
+        unitsElement.addEventListener('focusout', function (event) {
+
+            target_position = targetElement.value
+            avg_open = avgOpenElement.value
+            units = unitsElement.value
+
+            let formData = new FormData();
+
+            formData.append('target_position', target_position);
+            formData.append('avg_open', avg_open);
+            formData.append('units', units);
+
+            fetch('stocks/' + id + '/position', {
+                body: formData,
+                method: 'post'
+            }).then(function (response) {
+
+                return response.json();
+
+            }).then(function (myJson) {
+
+                this.data = myJson
+
+                return this.data
+            });
+        });
+    }
+
+    function remove(id) {
+
+        fetch('stocks/' + id + '/delete', {
+            method: 'delete'
+        }).then(function (response) {
+
+            return response.json();
+
+        }).then(function (myJson) {
+
+            this.data = myJson
+
+            return this.data
+        });
 
         parent.document.location.reload();
     }
@@ -343,44 +443,46 @@
 
     function autocomplete(inp) {
         var currentFocus;
-        inp.addEventListener("input", function(e) {
+        inp.addEventListener("input", function (e) {
 
             var a, b, i, val = this.value;
 
             closeAllLists();
-            if (!val) { return false;}
+            if (!val) {
+                return false;
+            }
             currentFocus = -1;
             a = document.createElement("DIV");
             a.setAttribute("id", this.id + "autocomplete-list");
             a.setAttribute("class", "autocomplete-items");
 
             this.parentNode.appendChild(a);
-            const match_stock = fetch('stocks/search?'+ new URLSearchParams({
+            const match_stock = fetch('stocks/search?' + new URLSearchParams({
                 keyword: this.value,
             }))
-                .then(function(response) {
+                .then(function (response) {
 
                     return response.json();
 
                 })
-                .then(function(myJson) {
+                .then(function (myJson) {
 
                     this.data = myJson
 
                     return this.data
                 });
 
-            Promise.resolve(match_stock).then(function(result) {
+            Promise.resolve(match_stock).then(function (result) {
 
                 for (i = 0; i <= result.length - 1; i++) {
 
                     b = document.createElement("DIV");
 
                     b.innerHTML += "<strong style='font-size: small'>" + result[i].symbol + "</br>"
-                    b.innerHTML += "<a style='font-size: smaller'>"+ result[i].name;
+                    b.innerHTML += "<a style='font-size: smaller'>" + result[i].name;
                     b.innerHTML += "<input style='font-size: small' type='hidden' value='" + result[i].symbol + "'>";
 
-                    b.addEventListener("click", function(e) {
+                    b.addEventListener("click", function (e) {
                         inp.value = this.getElementsByTagName("input")[0].value;
                         closeAllLists();
                     });
@@ -391,7 +493,7 @@
 
         });
 
-        inp.addEventListener("keydown", function(e) {
+        inp.addEventListener("keydown", function (e) {
             var x = document.getElementById(this.id + "autocomplete-list");
             if (x) x = x.getElementsByTagName("div");
             if (e.keyCode == 40) {

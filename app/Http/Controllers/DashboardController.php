@@ -100,10 +100,13 @@ class DashboardController
 
             $units = empty($stock_position) ? 0.0 : $stock_position->units;
 
+            //投資總額 = 單位數 * 平均開倉價
             $invested = empty($stock_position->units) || empty($stock_position->avg_open) ? 0.0 : ($stock_position->units * $stock_position->avg_open);
 
+            //市值價格 = 單位數 * 收盤價
             $value_price = $units * $close_price;
 
+            //投資損益 = 市值價格 - 投資總額
             $profit_loss_value = $value_price - $invested;
 
             $profit_loss_percent = null;
@@ -113,7 +116,13 @@ class DashboardController
                 $profit_loss_percent = 0.0;
             } else {
 
-                $profit_loss_percent = round(($profit_loss_value / $invested) * 100, 2);
+                if ($invested == 0) {
+
+                    $profit_loss_percent = 0.0;
+                } else {
+
+                    $profit_loss_percent = round(($profit_loss_value / $invested) * 100, 2);
+                }
             }
 
             return collect([
@@ -150,7 +159,7 @@ class DashboardController
         }
 
         return view('dashboard', [
-            'stocks' => $stocks,
+            'stocks' => $stocks->values(),
             'total_pages' => $total_pages,
             'current_page' => $current_page,
         ]);
