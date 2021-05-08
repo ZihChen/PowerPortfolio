@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\ChartController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\FiscalOverviewController;
 use App\Http\Controllers\StockController;
@@ -45,6 +46,11 @@ Route::group(['middleware' => 'auth'], function () {
         Route::get('/{stock_id}/overview', [FiscalOverviewController::class, 'getStockFiscalOverview']);
 
         Route::delete('/{stock_id}/delete', [StockController::class, 'removeUserStockRelation']);
+
+        Route::group(['prefix' => '{stock_id}/chart'], function () {
+
+            Route::get('quote', [ChartController::class, 'getQuotesChart']);
+        });
     });
 
     Route::get('user', [AuthController::class, 'getUser']);
