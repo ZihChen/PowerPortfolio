@@ -26,7 +26,7 @@ class CreateFiscalOverviewsTable extends Migration
                 $table->float('profit_margin', 12, 6);
                 $table->float('operating_margin', 12, 6);
                 $table->float('ev_to_revenue', 12, 6);
-                $table->text('content', 65535)->default('');
+                $table->text('content', 65535);
                 $table->date('latest_refresh');
                 $table->timestamps();
             });
