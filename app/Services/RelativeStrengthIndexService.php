@@ -281,4 +281,36 @@ class RelativeStrengthIndexService
             'rsi' => $rsi_indicator['rsi'],
         ]);
     }
+
+    /**
+     * RSI50目標價
+     * 目標價 = Close Price(yesterday) - (13 * AvgGain(yesterday)) - (13 * AvgLoss(yesterday))
+     * @param $latest_daily_record
+     * @param $latest_rsi_record
+     * @return float|int
+     */
+    public function calculateRsiFiftyTargetPrice($latest_daily_record, $latest_rsi_record)
+    {
+        $target_price = $latest_daily_record->close_price
+            - (13 * $latest_rsi_record->avg_gain)
+            - (13 * $latest_rsi_record->avg_loss);
+
+        return round($target_price, 2);
+    }
+
+    /**
+     * RSI30目標價
+     * 目標價 = Close Price(yesterday)  - (13 * AvgGain(yesterday)) - ((39/7) * AvgLoss(yesterday))
+     * @param $latest_daily_record
+     * @param $latest_rsi_record
+     * @return float
+     */
+    public function calculateRsiThirtyTargetPrice($latest_daily_record, $latest_rsi_record)
+    {
+        $target_price = $latest_daily_record->close_price
+            - (13 * $latest_rsi_record->avg_gain)
+            - ((39/7) * $latest_rsi_record->avg_loss);
+
+        return round($target_price, 2);
+    }
 }

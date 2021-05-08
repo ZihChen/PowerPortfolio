@@ -36,8 +36,9 @@
                 <th scope="col">收盤價</th>
                 <th scope="col">KD</th>
                 <th scope="col">RSI</th>
+                <th scope="col">目標價</th>
                 <th scope="col">投資紀錄</th>
-                <th scope="col">投資總額</th>
+                <th scope="col">市值</th>
                 <th scope="col">損益總額</th>
                 <th scope="col"></th>
             </tr>
@@ -125,8 +126,12 @@
                         </div>
                     </td>
                     <td>
+                        <i class="fab fa-envira"></i>{{$stock['rsi_fifty_target_price']}}<br>
+                        <i class="fas fa-seedling"></i>{{$stock['rsi_thirty_target_price']}}
+                    </td>
+                    <td>
                         <button type="button" class="collapsible" style="width: 85px; text-align: center">
-                            <i class="fas fa-feather-alt"></i>
+                            <i class="fas fa-edit"></i>
                         </button>
                         <div class="content">
                             <p style="font-size: smaller">

@@ -14,6 +14,7 @@ use App\Models\UserStockPositionService;
 use App\Services\YahooFinanceService;
 use App\Services\UserStockService;
 use App\Services\UserPositionService;
+use App\Services\RelativeStrengthIndexService;
 
 class DashboardController
 {
@@ -27,6 +28,8 @@ class DashboardController
 
     protected $userPositionService;
 
+    protected $relativeStrengthIndexService;
+
     /**
      * DashboardController constructor.
      * @param StockService $stockService
@@ -34,18 +37,21 @@ class DashboardController
      * @param UserStockPositionService $userStockPositionService
      * @param YahooFinanceService $yahooFinanceService
      * @param UserPositionService $userPositionService
+     * @param RelativeStrengthIndexService $relativeStrengthIndexService
      */
     public function __construct(StockService $stockService,
                                 UserStockService $userStockService,
                                 UserStockPositionService $userStockPositionService,
                                 YahooFinanceService $yahooFinanceService,
-                                UserPositionService $userPositionService)
+                                UserPositionService $userPositionService,
+                                RelativeStrengthIndexService $relativeStrengthIndexService)
     {
         $this->stockService = $stockService;
         $this->userStockService = $userStockService;
         $this->userStockPositionService = $userStockPositionService;
         $this->yahooFinanceService = $yahooFinanceService;
         $this->userPositionService = $userPositionService;
+        $this->relativeStrengthIndexService = $relativeStrengthIndexService;
     }
 
     public function getDashboard(Request $request)
@@ -82,6 +88,8 @@ class DashboardController
 
             $latest_daily_record = optional($stock->latest_daily_record);
 
+            $latest_rsi_record = optional($stock->latest_rsi_record);
+
             $kd_records = $stock->kd_records()->orderBy('date', 'desc')
                 ->where('interval', $interval)
                 ->where('fastk_period', $kd_period)
@@ -100,6 +108,7 @@ class DashboardController
                 ->reverse()
                 ->pluck('rsi', 'date');
 
+
             $stock_position = $stock_positions->where('stock_id', $stock->id)->first();
 
             $close_price = empty($latest_daily_record->close_price) ? 0.0 : $latest_daily_record->close_price;
@@ -115,7 +124,14 @@ class DashboardController
             //投資損益 = 市值價格 - 投資總額
             $profit_loss_value = $value_price - $invested;
 
+            //計算投資損益百分比
             $profit_loss_percent = $this->userPositionService->calculateProfitLossPercent($profit_loss_value, $invested);
+
+            //計算RSI50目標價
+            $rsi_fifty_target_price = $this->relativeStrengthIndexService->calculateRsiFiftyTargetPrice($latest_daily_record, $latest_rsi_record);
+
+            //計算RSI30目標價
+            $rsi_thirty_target_price = $this->relativeStrengthIndexService->calculateRsiThirtyTargetPrice($latest_daily_record, $latest_rsi_record);
 
             return collect([
                 'id' => $stock->id,
@@ -140,6 +156,8 @@ class DashboardController
                 'profit_loss_percent' => round($profit_loss_percent, 2),
                 'profit_loss_value' => round($profit_loss_value, 2),
                 'target_position' => empty($stock_position) ? 0.0 : $stock_position->target_position,
+                'rsi_fifty_target_price' => $rsi_fifty_target_price,
+                'rsi_thirty_target_price' => $rsi_thirty_target_price,
             ]);
         });
 

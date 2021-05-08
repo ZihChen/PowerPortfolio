@@ -42,4 +42,9 @@ class Stock extends Model
     {
         return $this->hasMany(RelativeStrengthIndex::class, 'stock_id', 'id');
     }
+
+    public function latest_rsi_record()
+    {
+        return $this->hasOne(RelativeStrengthIndex::class, 'stock_id', 'id')->orderBy('date', 'desc')->latest();
+    }
 }
