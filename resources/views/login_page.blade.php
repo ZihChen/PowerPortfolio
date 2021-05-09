@@ -12,6 +12,7 @@
             <div class="title">Member Login</div>
             <div>
                 <form class="row-form" action="{{"/login"}}" method="post">
+                    @csrf
                     <div class="col-auto" >
                         <label for="staticEmail2" class="visually-hidden">Email</label>
                         <input type="text" class="form-control" id="staticEmail2" placeholder="Email" name="email">
