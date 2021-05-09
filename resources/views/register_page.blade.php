@@ -12,6 +12,7 @@
             <div class="title">Register</div>
                 <div>
                     <form class="row-form" action="{{"/register"}}" method="post">
+                        @csrf
                         <div class="col-auto" >
                             <label for="staticEmail2" class="visually-hidden">Name</label>
                             <input type="text" class="form-control" id="staticEmail2" placeholder="Name" name="name">
