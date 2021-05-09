@@ -14,4 +14,6 @@ trait ErrorResponseMsgTrait
     public $symbolNotFoundMsg = 'Symbol Not Found';
 
     public $highFrequencyRequestMsg = 'High Frequency Request';
+
+    public $VerifyFailedMsg = 'Verify Failed';
 }

@@ -15,4 +15,6 @@ trait ErrorResponseCodeTrait
     public $accepted = 202;
     public $badRequest = 400;
     public $notFound = 404;
+
+    public $userVerifyFailed = 1001;
 }

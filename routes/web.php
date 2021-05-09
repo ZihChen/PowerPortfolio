@@ -31,7 +31,7 @@ Route::group(['middleware' => 'guest'], function() {
 
 });
 
-Route::group(['middleware' => 'auth'], function () {
+Route::group(['middleware' => ['auth', 'user.verify']], function () {
 
     Route::get('dashboard', [DashboardController::class, 'getDashboard']);
 
