@@ -8,3 +8,4 @@
 </script>
 <script src="https://kit.fontawesome.com/7dd7e9c038.js" crossorigin="anonymous"></script>
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.7.1/Chart.min.js" charset="utf-8"></script>

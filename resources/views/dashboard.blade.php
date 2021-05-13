@@ -186,6 +186,7 @@
         font-size: small;
         margin-left: 3px;
         margin-right: 3px;
+        color: #218BC3;
     }
     .collapsible {
         background-color: #60B390;
